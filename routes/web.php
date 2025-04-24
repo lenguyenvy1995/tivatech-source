@@ -166,7 +166,7 @@ Route::middleware('auth')->group(function () {
         });
         Route::resource('websites', WebsiteController::class);
 
-        // data khách hàng tìm kiếm
+        // data khách hàng tìm kiếm nhé em yêu
         Route::prefix('data-customers')->name('dataCustomers.')->group(function (): void {
             Route::get('/', [DataCustomerController::class, 'index'])->name('index');
             Route::post('/store', [DataCustomerController::class, 'store'])->name('store');
