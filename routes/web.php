@@ -164,6 +164,7 @@ Route::middleware('auth')->group(function () {
             Route::post('/search-domain', [WebsiteController::class, 'check'])->name('check_post'); //gửi domain check 
             Route::get('{website}/campaigns', [CampaignController::class, 'index'])->name('campaigns'); //list campaign theo website
         });
+        Route::resource('websites', WebsiteController::class);
 
         // data khách hàng tìm kiếm
         Route::prefix('data-customers')->name('dataCustomers.')->group(function (): void {
