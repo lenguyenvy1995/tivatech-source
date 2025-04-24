@@ -1,0 +1,4 @@
+*.ini
+.env
+*.zip
+.DS_Store

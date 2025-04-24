@@ -1,0 +1,29 @@
+index.html
+<!-- Thêm CSS và JavaScript Flatpickr cùng plugin Month Select -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/plugins/monthSelect/style.css">
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/plugins/monthSelect/index.js"></script>
+
+<!-- HTML cho input -->
+<div class="form-group">
+    <label for="monthYearPicker">Chọn tháng và năm:</label>
+    <input type="text" id="monthYearPicker" class="form-control" placeholder="Chọn tháng và năm" readonly="readonly">
+</div>
+
+<!-- Khởi tạo Flatpickr -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        flatpickr("#monthYearPicker", {
+            dateFormat: "m-Y",        // Định dạng chỉ hiển thị tháng và năm
+            locale: "vi",              // Thiết lập ngôn ngữ là tiếng Việt
+            plugins: [
+                new monthSelectPlugin({
+                    shorthand: true,    // Hiển thị dạng ngắn gọn cho tháng
+                    dateFormat: "m-Y",  // Định dạng tháng-năm
+                    altFormat: "F Y"    // Định dạng thay thế: Tháng Tên Năm
+                })
+            ]
+        });
+    });
+</script>

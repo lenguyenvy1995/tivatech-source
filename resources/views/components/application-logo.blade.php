@@ -1,0 +1,1 @@
+<img src="{{asset('logo.png')}}" alt="logo tivatech" width="200px" srcset="">
