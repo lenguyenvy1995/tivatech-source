@@ -889,7 +889,8 @@ class CampaignController extends Controller
         if (request()->ajax()) {
             return datatables()->of($campaign->budgets)
                 ->editColumn('budget', function ($row) {
-                    return number_format($row->budget);
+                    $tooltip = $row->account ?? '';
+                    return '<span data-toggle="tooltip" title="' . $tooltip . '">' . number_format($row->budget) . '</span>';
                 })
                 ->editColumn('date', function ($row) {
                     return Carbon::parse($row->date)->format('d-m-Y');
@@ -918,7 +919,7 @@ class CampaignController extends Controller
                         <a href="javascript:void(0)" data-id="' . $row->id . '" class="btn btn-danger btn-sm deleteBudget"><i class="fas fa-trash">  </i></a>
                     ';
                 })
-                ->rawColumns(['action', 'calu'])
+                ->rawColumns(['action', 'calu', 'budget'])
                 ->make(true);
         }
         // Trả về view nếu không phải AJAX

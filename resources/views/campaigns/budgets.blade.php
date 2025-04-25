@@ -138,6 +138,13 @@
                 ]
             });
 
+            // Kích hoạt tooltip sau khi bảng render lại
+            table.on('draw', function() {
+                setTimeout(() => {
+                    $('[data-toggle="tooltip"]').tooltip();
+                }, 500);
+            });
+
            
             $('#addBudget').on('click', function() {
                 $('#addBudgetModal').modal('show'); // Đóng modal
