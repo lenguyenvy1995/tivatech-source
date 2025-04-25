@@ -101,10 +101,13 @@
 
                 ajax: '{{ route('campaigns.budgets', $campaign->id) }}',
                 columns: [{
-                        data: 'id',
-                        name: 'id',
+                        data: null,
+                        name: 'stt',
                         searchable: false,
                         orderable: false,
+                        render: function (data, type, row, meta) {
+                            return meta.row + 1;
+                        }
                     },
 
                     {
