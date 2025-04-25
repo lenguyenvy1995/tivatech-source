@@ -127,6 +127,7 @@ class SalaryController extends Controller
             'other_cost' => $request->input('other_expenses'),
             'total_salary' => $request->input('t_total_salary'),
             'bonus_salary' => $request->input('bonus'),
+            'bhxh' => $request->input('bhxh'),
         ]);
         // $message = str_replace('<br>', "\n", 'Bảng lương tháng: ' . Carbon::parse($salary->month_salary)->format('m-Y') . '<br>' . route('salaries.show', $salary->id));
         // $zaloService = new ZaloService;
