@@ -448,16 +448,6 @@ return [
             'url'  => 'design-websites',
             'icon' => 'fas fa-globe',
         ],
-        [
-            'text' => 'Quản lý Domain',
-            'url'  => 'domains',
-            'icon' => ' nav-icon fas fa-globe',
-        ],
-        [
-            'text' => 'Quản lý Hosting',
-            'url'  => 'hostings',
-            'icon' => 'nav-icon fas fa-server',
-        ],
         // Phân cách
         [
             'header' => 'LƯƠNG NHÂN VIÊN',

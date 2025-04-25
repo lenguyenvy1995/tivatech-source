@@ -16,7 +16,8 @@
                     <a href="#" class="status-filter text-dark" data-status="1">Hoạt động</a> |
                     <a href="#" class="status-filter text-dark" data-status="2">Backuped</a> |
                     <a href="#" class="status-filter text-dark" data-status="3">Tạm ngưng</a> |
-                    <a href="#" class="status-filter text-dark" data-status="4">Hết hạn</a>
+                    <a href="#" class="status-filter text-dark" data-status="4">Hết hạn</a> |
+                    <a href="#" class="status-filter text-dark" data-status="soon">Sắp hết hạn</a>
                 </div>
                 <div>
                     <a href="{{ route('design-websites.create') }}" class="btn btn-primary">
@@ -92,6 +93,9 @@
                         url: '{{ route("design-websites.data") }}',
                         data: function (d) {
                             d.status = selectedStatus;
+                            if (selectedStatus === 'soon') {
+                                d.expiration_filter = 'soon';
+                            }
                         }
                     },
                     pageLength: 100,

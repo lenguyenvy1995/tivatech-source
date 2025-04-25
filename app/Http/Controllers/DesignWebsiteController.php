@@ -23,6 +23,9 @@ class DesignWebsiteController extends Controller
         if (is_numeric($request->status)) {
             $data->where('design_website.status', $request->status);
         }
+        if ($request->get('expiration_filter') === 'soon') {
+            $data->whereBetween('expiration_date', [now(), now()->addDays(30)]);
+        }
 
         return DataTables::of($data)
             ->addIndexColumn() // 👈 Thêm dòng này
