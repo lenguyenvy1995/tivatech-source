@@ -11,7 +11,7 @@
         <div class="card-body">
             <div class="mb-3 d-flex justify-content-between align-items-center">
                 <div>
-                    <span class="mr-2">Sắp xếp theo fff:</span>
+                    <span class="mr-2">Sắp xếp theo:</span>
                     <a href="#" class="status-filter font-weight-bold text-primary" data-status="">Tất cả</a> |
                     <a href="#" class="status-filter text-dark" data-status="1">Hoạt động</a> |
                     <a href="#" class="status-filter text-dark" data-status="2">Backuped</a> |
