@@ -23,6 +23,8 @@
                <button type="button" class="btn btn-primary" id="searchButton">Tìm kiếm</button>
             </form>
             <div id="result" class="mt-4"></div>
+            <button type="button" class="btn btn-success mt-3" id="randomKeywordButton">Hiển thị 5 từ khoá</button>
+            <ul id="randomKeywords" class="mt-3"></ul>
         </div>
     </div>
 @stop
@@ -117,6 +119,28 @@
                 return domains;
             }
 
+        });
+        // Hiển thị 5 từ khoá ngẫu nhiên
+        $('#randomKeywordButton').click(function() {
+            $.ajax({
+                url: '{{ route('keywords.random') }}',
+                method: 'GET',
+                success: function(response) {
+                    const list = $('#randomKeywords');
+                    list.empty();
+                    response.forEach(keyword => {
+                        const googleSearchUrl = 'https://www.google.com/search?adtest=on&q=' + encodeURIComponent(keyword.name);
+                        list.append(`<li><a href="${googleSearchUrl}" target="_blank">${keyword.name}</a></li>`);
+                    });
+                },
+                error: function(xhr) {
+                    if (xhr.status === 404) {
+                        toastr.info('Bạn đã hết từ khoá mới!');
+                    } else {
+                        toastr.error('Không lấy được từ khoá!');
+                    }
+                }
+            });
         });
     </script>
 @stop

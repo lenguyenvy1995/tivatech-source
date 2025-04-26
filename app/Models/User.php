@@ -76,5 +76,10 @@ class User extends Authenticatable
     {
         return $this->hasMany(KpiSalary::class, 'user_id');
     }
-    
+    public function keywords()
+    {
+        return $this->belongsToMany(Keyword::class, 'user_keyword')
+            ->withTimestamps()
+            ->withPivot('created_at');
+    }
 }

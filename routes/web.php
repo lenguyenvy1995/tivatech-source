@@ -30,6 +30,7 @@ use App\Http\Controllers\DataCustomerController;
 use App\Http\Controllers\DomainController;
 use App\Http\Controllers\HostingController;
 use App\Http\Controllers\DesignWebsiteController;
+use App\Http\Controllers\KeywordController;
 
 /*
 |--------------------------------------------------------------------------
@@ -119,7 +120,12 @@ Route::middleware('auth')->group(function () {
     Route::get('/api/monthly-sales', [AdminController::class, 'getMonthlySalesData'])->name('api.monthly-sales');
     Route::get('/api/weekly-budget-comparison', [AdminController::class, 'getWeeklyBudgetComparison'])->name('api.weekly-budget-comparison');
 
-
+    Route::get('/api/quote-requests', [QuoteRequestController::class, 'getData'])->name('quote-requests.data');
+    Route::get('/keywords/random', [KeywordController::class, 'getRandomKeywords'])->name('keywords.random');//route cho random hiển thị từ khoá 
+    Route::middleware(['role:admin'])->group(function () {
+        Route::resource('keywords', KeywordController::class);
+    });    // Routes cho tất cả người dùng đã đăng nhập
+    // profile nhân viên
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');

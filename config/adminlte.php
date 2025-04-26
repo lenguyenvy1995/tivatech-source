@@ -154,7 +154,7 @@ return [
 
     'layout_topnav' => null,
     'layout_boxed' => null,
-    'layout_fixed_sidebar' => null,
+    'layout_fixed_sidebar' => true,
     'layout_fixed_navbar' => null,
     'layout_fixed_footer' => null,
     'layout_dark_mode' => null,
@@ -440,7 +440,12 @@ return [
                 ],
             ],
         ],
-
+        [
+            'text' => 'Quản lý Từ Khoá',
+            'url'  => 'keywords',
+            'icon' => 'fas fa-key',
+            'can' => 'manage users', // Chỉ hiển thị cho role:admin
+        ],
         ['header' => 'QUẢN LÝ THIẾT KẾ WEBSITE'],
 
         [
