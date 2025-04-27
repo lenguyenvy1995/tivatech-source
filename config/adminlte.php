@@ -399,8 +399,8 @@ return [
 
                 // Mục cho Saler
                 [
-                    'text' => 'Data 6 Tháng',
-                    'route'  => 'websites.inactiveCampaigns',
+                    'text' => 'Data 3 Tháng',
+                    'route'  => 'websites.inactive-campaigns',
                     'icon' => 'nav-icon fas fa-dice-six',
                     'can'  => 'manage own quote requests',
                 ],

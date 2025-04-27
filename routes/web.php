@@ -165,7 +165,7 @@ Route::middleware('auth')->group(function () {
     //google ads
     Route::middleware(['role:quote manager|admin|saler|manager|techads'])->group(function () {
         Route::prefix('websites')->name('websites.')->group(function (): void {
-            Route::get('/inactive-campaigns', [WebsiteController::class, 'inactiveCampaigns'])->name('inactiveCampaigns');
+            Route::get('/inactive-campaigns', [WebsiteController::class, 'inactiveCampaigns'])->name('inactive-campaigns');
             Route::view('/check', 'websites.check')->name('check'); // hiển thị view check website
             Route::post('/search-domain', [WebsiteController::class, 'check'])->name('check_post'); //gửi domain check 
             Route::get('{website}/campaigns', [CampaignController::class, 'index'])->name('campaigns'); //list campaign theo website

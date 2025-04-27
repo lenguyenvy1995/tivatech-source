@@ -112,22 +112,35 @@ class WebsiteController extends Controller
         $campaigns = $website->campaigns; // Giả sử model Website có quan hệ với Campaign
         return view('websites.campaigns', compact('website', 'campaigns'));
     }
-    // kiểm tra website đã nhưng chạy
+    // kiểm tra website đã ngừng chạy (in-active)
     public function inactiveCampaigns(Request $request)
     {
-        // Lấy ngày hiện tại trừ 6 tháng
-        $numberMonth = Carbon::now()->subMonths($request->numberMonth ?? 6);
+        $numberMonth = Carbon::now()->subMonths($request->numberMonth ?? 3);
 
-        // Chỉ lấy các Website có latestCampaign với end <= 6 tháng trước
-        $domains = Website::whereHas('latestCampaign', function ($query) use ($numberMonth) {
-            $query->where('end', '<=', $numberMonth);
-        })
-            ->with('latestCampaign') // Lấy thêm thông tin của latestCampaign
-            ->paginate(200)
-            ->sortByDesc(function ($domain) {
-                return $domain->campaign->max('end'); // Sắp xếp theo campaign mới nhất
-            });
-        return view('websites.inactive_campaigns', compact('domains'));
+        // Lấy các website có chiến dịch mới nhất đã kết thúc cách đây hơn $numberMonth
+        $domains = Website::with(['latestCampaign', 'user'])
+            ->whereHas('latestCampaign', function ($query) use ($numberMonth) {
+                $query->where('end', '<=', $numberMonth);
+            })
+            ->get()
+            ->sortByDesc(function($website) {
+                return optional($website->latestCampaign)->end;
+            })
+            ->values();
+
+        if ($request->ajax()) {
+            return DataTables::of($domains)
+                ->addIndexColumn()
+                ->editColumn('latestCampaign.end', function($row) {
+                    return $row->latestCampaign ? Carbon::parse($row->latestCampaign->end)->format('d-m-Y') : '';
+                })
+                ->editColumn('user.fullname', function($row) {
+                    return $row->user->fullname ?? '';
+                })
+                ->make(true);
+        }
+
+        return view('websites.inactive_campaigns');
     }
     /**
      * Xử lý kiểm tra  domain.
