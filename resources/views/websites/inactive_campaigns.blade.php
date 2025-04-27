@@ -13,7 +13,6 @@
                 <th>STT</th>
                 <th>Domain</th>
                 <th>Kết Thúc</th>
-                <th>Nhân Viên Sales</th>
             </tr>
         </thead>
     </table>
@@ -29,8 +28,7 @@ $(function () {
         columns: [
             { data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false },
             { data: 'name', name: 'name' },
-            { data: 'latestCampaign.end', name: 'latestCampaign.end' },
-            { data: 'user.fullname', name: 'user.fullname' }
+            { data: 'latest_end', name: 'latest_end' }
         ],
         lengthMenu: [[100, 200, 500, -1], [100, 200, 500, "Tất cả"]],
         pageLength: 100,

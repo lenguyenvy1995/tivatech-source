@@ -6,7 +6,7 @@ use App\Models\Campaign;
 use Illuminate\Http\Request;
 use App\Models\Website;
 use Illuminate\Support\Facades\Auth;
-use Yajra\DataTables\DataTables;
+use Yajra\DataTables\Facades\DataTables;
 use Carbon\Carbon;
 
 class WebsiteController extends Controller
@@ -116,31 +116,26 @@ class WebsiteController extends Controller
     public function inactiveCampaigns(Request $request)
     {
         $numberMonth = Carbon::now()->subMonths($request->numberMonth ?? 3);
-
-        // Lấy các website có chiến dịch mới nhất đã kết thúc cách đây hơn $numberMonth
-        $domains = Website::with(['latestCampaign', 'user'])
-            ->whereHas('latestCampaign', function ($query) use ($numberMonth) {
-                $query->where('end', '<=', $numberMonth);
-            })
-            ->withCount(['campaigns as latest_end' => function ($query) {
-                $query->select(\DB::raw('MAX(end)'));
-            }])
-            ->orderByDesc('latest_end')
-            ->limit(1000)
-            ->get();
-
+    
+        $query = Website::select(
+                    'website.id',
+                    'website.name',
+                    \DB::raw('MAX(campaigns.end) as latest_end')
+                )
+                ->join('campaigns', 'campaigns.website_id', '=', 'website.id')
+                ->groupBy('website.id', 'website.name')
+                ->having('latest_end', '<=', $numberMonth)
+                ->orderByDesc('latest_end');
+    
         if ($request->ajax()) {
-            return DataTables::of($domains)
+            return DataTables::eloquent($query)
                 ->addIndexColumn()
-                ->editColumn('latestCampaign.end', function($row) {
-                    return $row->latestCampaign ? Carbon::parse($row->latestCampaign->end)->format('d-m-Y') : '';
-                })
-                ->editColumn('user.fullname', function($row) {
-                    return $row->user->fullname ?? '';
+                ->editColumn('latest_end', function ($row) {
+                    return $row->latest_end ? Carbon::parse($row->latest_end)->format('d-m-Y') : '';
                 })
                 ->make(true);
         }
-
+    
         return view('websites.inactive_campaigns');
     }
     /**
