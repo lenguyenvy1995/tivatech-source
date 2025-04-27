@@ -122,11 +122,12 @@ class WebsiteController extends Controller
             ->whereHas('latestCampaign', function ($query) use ($numberMonth) {
                 $query->where('end', '<=', $numberMonth);
             })
-            ->get()
-            ->sortByDesc(function($website) {
-                return optional($website->latestCampaign)->end;
-            })
-            ->values();
+            ->withCount(['campaigns as latest_end' => function ($query) {
+                $query->select(\DB::raw('MAX(end)'));
+            }])
+            ->orderByDesc('latest_end')
+            ->limit(1000)
+            ->get();
 
         if ($request->ajax()) {
             return DataTables::of($domains)
