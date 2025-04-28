@@ -10,7 +10,7 @@ use App\Models\Budget;
 use App\Models\Note;
 use App\Models\User;
 use App\Models\Status;
-use Yajra\DataTables\DataTables;
+use Yajra\DataTables\Facades\DataTables;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -91,7 +91,119 @@ class CampaignController extends Controller
         return response()->json(['success' => true]);
     }
     /// quản lý chiến dịch
+
     public function list(Request $request)
+    {
+        $user = Auth::user();
+
+        // Query chính với các field cụ thể cần dùng (tối ưu từ ban đầu)
+        $query = Campaign::query()
+            ->select('id', 'website_id', 'user_id', 'start', 'end', 'payment', 'budgetmonth', 'status_id', 'typecamp_id', 'paid', 'vat')
+            ->with(['website:id,name', 'user:id,fullname', 'status:id,name,theme']) // Load nhẹ relation
+            ->withCount('budgets'); // lấy nhanh số lượng budgets
+        // Điều kiện role
+        if ($user->hasRole('saler')) {
+            $query->where('user_id', $user->id)->whereIn('status_id', ['1', '2']);
+        } elseif ($user->hasRole('admin|manager|techads')) {
+            $query->whereIn('status_id', ['1', '2']);
+        } else {
+            return response()->json(['data' => []]);
+        }
+        // Lấy câu lệnh SQL và bindings
+        $sql = $query->toSql();
+        $bindings = $query->getBindings();
+
+        // Xem câu truy vấn hoàn chỉnh
+        $fullSql = vsprintf(str_replace('?', "'%s'", $sql), $bindings);
+
+        // Hoặc sử dụng dd() để kiểm tra ngay trên trình duyệt
+        dd($fullSql);
+
+        // Các bộ lọc nhanh
+        if ($request->filter_paid == '1') $query->where('paid', 0);
+        if ($request->filter_vat == '1') $query->where('vat', 1);
+        if ($request->filter_status) $query->where('status_id', $request->filter_status);
+        if ($request->filter_user) $query->where('user_id', $request->filter_user);
+
+        if ($request->filter_typecamp_tg && $request->filter_typecamp_ns) {
+            $query->whereIn('typecamp_id', [1, 2]);
+        } elseif ($request->filter_typecamp_tg) {
+            $query->where('typecamp_id', 1);
+        } elseif ($request->filter_typecamp_ns) {
+            $query->where('typecamp_id', 2);
+        }
+
+        if ($request->filter_expired == '1') {
+            $query->where(function ($q) {
+                $q->where(function ($q1) {
+                    $q1->where('typecamp_id', 2)
+                        ->whereRaw('(payment - (SELECT COALESCE(SUM(budget), 0) FROM budgets WHERE campaign_id = campaigns.id)) <= (budgetmonth / 30 + (budgetmonth / 30 / 2))');
+                })->orWhere(function ($q2) {
+                    $q2->where('typecamp_id', 1)
+                        ->whereRaw('(budgets_count + 1) >= (DATEDIFF(end, start) + 1)');
+                });
+            });
+        }
+
+        // Search nhanh theo website
+        if ($request->filled('search')) {
+            $query->whereHas('website', function ($q) use ($request) {
+                $q->where('name', 'like', '%' . $request->search . '%');
+            });
+        }
+        dd($query->toSql(), $query->getBindings());
+        // DataTables server-side xử lý
+        if ($request->ajax()) {
+            return DataTables::of($query)
+                ->addColumn('stt', function ($campaign) use ($user) {
+                    $res = '<span class="status-dot ' . $campaign->status->theme . '"></span> ' . ucfirst($campaign->status->name);
+                    return $res;
+                })
+                ->addColumn('website_name', function ($campaign) {
+                    return '<a href="' . route('campaigns.budgets', $campaign->id) . '" target="_blank">' . optional($campaign->website)->name . '</a><br><small>Saler: ' . optional($campaign->user)->fullname . '</small>';
+                })
+                ->addColumn('duration', function ($campaign) {
+                    return Carbon::parse($campaign->start)->format('H:i d-m-Y') . ' → ' . Carbon::parse($campaign->end)->format('H:i d-m-Y');
+                })
+                ->addColumn('information', function ($campaign) {
+                    return 'Ngân sách: <strong>' . number_format($campaign->budgetmonth) . '</strong><br>'
+                        . 'Thanh toán: <strong>' . number_format($campaign->payment) . '</strong><br>'
+                        . 'VAT: ' . ($campaign->vat == 2 ? 'Đã Xuất' : 'Chưa Xuất');
+                })
+                ->addColumn('expired', function ($campaign) {
+                    $budgetSum = Budget::where('campaign_id', $campaign->id)->sum('budget');
+                    $remainingBudget = $campaign->payment - $budgetSum;
+                    if ($campaign->typecamp_id == 2) {
+                        return number_format($remainingBudget);
+                    } else {
+                        $totalDays = Carbon::parse($campaign->start)->diffInDays(Carbon::parse($campaign->end)) + 1;
+                        $remainingDays = $totalDays - $campaign->budgets_count;
+                        return $remainingDays . ' ngày còn lại';
+                    }
+                })
+                ->addColumn('note_campaign', function ($campaign) {
+                    $notes = Note::where('campaign_id', $campaign->id)->latest()->limit(3)->pluck('note')->toArray();
+                    $noteText = implode('<br>- ', $notes);
+                    return '- ' . $noteText;
+                })
+                ->addColumn('action', function ($campaign) use ($user) {
+                    $buttons = '';
+                    if ($user->hasRole(['admin', 'techads', 'manager'])) {
+                        $buttons .= '<form action="' . route('campaigns.destroy', $campaign->id) . '" method="POST" style="display:inline-block;">'
+                            . csrf_field() . method_field('DELETE')
+                            . '<button class="btn btn-danger btn-sm ml-1"><i class="fas fa-trash"></i></button></form>';
+                    }
+                    $buttons .= '<a href="' . route('campaigns.show', $campaign->id) . '" class="btn btn-info btn-sm ml-1"><i class="fas fa-eye"></i></a>'
+                        . '<button class="btn bg-purple btn-sm ml-1" onclick="openNoteModal(' . $campaign->id . ')"><i class="fas fa-sticky-note"></i></button>';
+                    return $buttons;
+                })
+                ->rawColumns(['stt', 'website_name', 'note_campaign', 'action', 'information'])
+                ->make(true);
+        }
+
+        return view('campaigns.list');
+    }
+    public function list2(Request $request)
     {
         $user = Auth::user(); // Lấy thông tin người dùng hiện tại
 
@@ -333,7 +445,7 @@ class CampaignController extends Controller
                         // Xác định giờ nhập
                         $startTime = $start->format('H:i');
                         $endTime = $end->format('H:i');
-                    
+
                         if ($startTime == '00:00' && $endTime == '00:00') {
                             $days += 1; // Từ 00:00 đến 00:00 là trọn ngày
                         } elseif ($startTime == '12:00' && $endTime == '12:00') {

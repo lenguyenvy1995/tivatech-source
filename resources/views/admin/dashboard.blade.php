@@ -3,7 +3,7 @@
 @section('title', 'Dashboard Admin')
 
 @section('content_header')
-    <h1>Tổng quan</h1>
+    <h1>Tổng quan hệ thống</h1>
 @stop
 
 @section('content')
