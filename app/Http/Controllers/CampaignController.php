@@ -167,13 +167,13 @@ class CampaignController extends Controller
 
             // Sorting logic based on filters
             if (
-                $request->filled('filter_status') ||
                 $request->filled('filter_paid') ||
                 $request->filter_expired == '1' ||
                 $request->filter_typecamp_tg == '1' ||
-                $request->filter_typecamp_ns == '2'
+                $request->filter_typecamp_ns == '2' ||
+                $request->filled('search.value')
             ) {
-                $query->orderByDesc('campaigns.end');
+                $query->orderBy('campaigns.end');
             } else {
                 $query->orderBy('campaigns.status_id', 'asc')->orderBy('campaigns.end', 'asc');
             }
