@@ -32,7 +32,7 @@
 <div class="card">
     <div class="card-body">
         <div class="row mb-3">
-            <div class="col-md-3">
+            <div class="col-md-2">
                 <select id="filterStatus" class="form-control select2" multiple="multiple" data-placeholder="Chọn trạng thái" style="width: 100%;">
                     <option value="all">Chọn tất cả</option>
                     <option value="1" selected>Hoạt động</option>
@@ -42,13 +42,23 @@
                     <option value="5">Setup</option>
                 </select>
             </div>
-            <div class="col-md-3">
+            <div class="col-md-2">
                 <select id="filterPaid" class="form-control">
                     <option value="">-- Lọc thanh toán --</option>
                     <option value="1">Đã thanh toán</option>
                     <option value="0">Chưa thanh toán</option>
                 </select>
             </div>
+            @if (Auth::user()->hasRole(['admin', 'techads']))
+            <div class="col-md-2">
+                <select id="filterUser" class="form-control select2" data-placeholder="Chọn nhân viên" style="width: 100%;">
+                    <option value="">-- Chọn nhân viên --</option>
+                    @foreach(\App\Models\User::where('status', 1)->get() as $user)
+                        <option value="{{ $user->id }}">{{ $user->fullname }}</option>
+                    @endforeach
+                </select>
+            </div>
+            @endif
             <!-- Removed filterName input field -->
             <div class="col-md-3 d-flex align-items-center">
                 <div class="form-check mr-3">
@@ -64,6 +74,7 @@
                     <label class="form-check-label font-weight-bold" for="filterTypecampNs">Ngân sách</label>
                 </div>
             </div>
+          
         </div>
         <table id="campaigns-table" class="table table-bordered table-striped table-hover" style="table-layout: fixed;">
             <thead>
@@ -166,6 +177,7 @@ $(document).ready(function(){
                 d.filter_typecamp_tg = $('#filterTypecampTg').is(':checked') ? '1' : '';
                 d.filter_typecamp_ns = $('#filterTypecampNs').is(':checked') ? '2' : '';
                 // Removed: d.search = $('#filterName').val();
+                d.filter_user = $('#filterUser').val();
             }
         },
         lengthMenu: [[10, 25, 50, 100, 200, -1], [10, 25, 50, 100, 200, "All"]],
@@ -190,6 +202,9 @@ $(document).ready(function(){
     });
 
     $('#filterStatus, #filterPaid, #filterExpired, #filterTypecampTg, #filterTypecampNs').on('change', function() {
+        $('#campaigns-table').DataTable().ajax.reload();
+    });
+    $('#filterUser').on('change', function() {
         $('#campaigns-table').DataTable().ajax.reload();
     });
 });
@@ -232,11 +247,58 @@ $(document).on('change', '.toggle-paid', function() {
             paid: paid
         },
         success: function(response) {
-            console.log('Cập nhật trạng thái thanh toán thành công');
+            $(document).Toasts('create', {
+                class: 'bg-success',
+                title: 'Thông báo',
+                body: 'Cập nhật trạng thái thanh toán thành công',
+                autohide: true,
+                delay: 2000
+            });
             $('#campaigns-table').DataTable().ajax.reload(null, false);
         },
         error: function(xhr) {
-            console.error('Lỗi cập nhật trạng thái thanh toán');
+            $(document).Toasts('create', {
+                class: 'bg-danger',
+                title: 'Lỗi',
+                body: 'Cập nhật trạng thái thanh toán thất bại',
+                autohide: true,
+                delay: 2000
+            });
+        }
+    });
+});
+
+// Xử lý toggle VAT
+$(document).on('change', '.toggle-vat', function() {
+    var campaignId = $(this).data('id');
+    var vat = $(this).is(':checked') ? 2 : 1;
+
+    $.ajax({
+        url: '/campaigns/update-vat',
+        type: 'POST',
+        data: {
+            _token: '{{ csrf_token() }}',
+            campaign_id: campaignId,
+            vat: vat
+        },
+        success: function(response) {
+            $(document).Toasts('create', {
+                class: 'bg-success',
+                title: 'Thông báo',
+                body: 'Cập nhật trạng thái VAT thành công',
+                autohide: true,
+                delay: 2000
+            });
+            $('#campaigns-table').DataTable().ajax.reload(null, false);
+        },
+        error: function(xhr) {
+            $(document).Toasts('create', {
+                class: 'bg-danger',
+                title: 'Lỗi',
+                body: 'Cập nhật trạng thái VAT thất bại',
+                autohide: true,
+                delay: 2000
+            });
         }
     });
 });
@@ -255,11 +317,23 @@ $(document).on('click', '.change-status', function(e) {
             status_id: statusId
         },
         success: function(response) {
-            console.log('Đổi trạng thái thành công');
+            $(document).Toasts('create', {
+                class: 'bg-success',
+                title: 'Thông báo',
+                body: 'Đổi trạng thái chiến dịch thành công',
+                autohide: true,
+                delay: 2000
+            });
             $('#campaigns-table').DataTable().ajax.reload(null, false);
         },
         error: function(xhr) {
-            console.error('Lỗi đổi trạng thái');
+            $(document).Toasts('create', {
+                class: 'bg-danger',
+                title: 'Lỗi',
+                body: 'Đổi trạng thái chiến dịch thất bại',
+                autohide: true,
+                delay: 2000
+            });
         }
     });
 });

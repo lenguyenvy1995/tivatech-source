@@ -124,6 +124,10 @@ class CampaignController extends Controller
             } else {
                 $query->whereIn('campaigns.status_id', [1, 2]);
             }
+            // Lọc theo nhân viên (user)
+            if ($request->filled('filter_user')) {
+                $query->where('campaigns.user_id', $request->filter_user);
+            }
             // lọc chiến dịch hết hạn
             if ($request->filter_expired == '1') {
                 $query->where(function ($q) {
