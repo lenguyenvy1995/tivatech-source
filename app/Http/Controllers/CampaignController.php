@@ -165,6 +165,19 @@ class CampaignController extends Controller
                 $query->where('website.name', 'like', '%' . $request->input('search.value') . '%');
             }
 
+            // Sorting logic based on filters
+            if (
+                $request->filled('filter_status') ||
+                $request->filled('filter_paid') ||
+                $request->filter_expired == '1' ||
+                $request->filter_typecamp_tg == '1' ||
+                $request->filter_typecamp_ns == '2'
+            ) {
+                $query->orderByDesc('campaigns.end');
+            } else {
+                $query->orderBy('campaigns.status_id', 'asc')->orderBy('campaigns.end', 'asc');
+            }
+
             return DataTables::of($query)
                 ->addColumn('status', function ($campaign) {
                     $user =Auth::user();

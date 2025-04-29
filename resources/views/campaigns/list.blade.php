@@ -34,6 +34,7 @@
         <div class="row mb-3">
             <div class="col-md-3">
                 <select id="filterStatus" class="form-control select2" multiple="multiple" data-placeholder="Chọn trạng thái" style="width: 100%;">
+                    <option value="all">Chọn tất cả</option>
                     <option value="1" selected>Hoạt động</option>
                     <option value="2" selected>Tạm dừng</option>
                     <option value="3">Hoàn thành</option>
@@ -112,6 +113,14 @@
 .badge-info { background-color: #17a2b8; color: white; }
 .badge-secondary { background-color: #6c757d; color: white; }
 </style>
+<style>
+/* Custom style for select2 selected choices in multiselect */
+.select2-selection__choice {
+    background-color: #dc3545 !important;
+    border-color: #dc3545 !important;
+    color: white !important;
+}
+</style>
 @stop
 
 @section('js')
@@ -121,6 +130,20 @@ $(document).ready(function(){
         placeholder: "Chọn trạng thái",
         allowClear: true,
         width: '100%'
+    }).on('select2:select', function(e) {
+        // If "Chọn tất cả" is selected, select all options
+        if (e.params && e.params.data && e.params.data.id === 'all') {
+            var $select = $(this);
+            // Select all except "all" itself
+            var allValues = [];
+            $select.find('option').each(function(){
+                var v = $(this).val();
+                if (v !== 'all') {
+                    allValues.push(v);
+                }
+            });
+            $select.val(allValues).trigger('change.select2');
+        }
     });
     $('#campaigns-table').DataTable({
         processing: true,
@@ -132,7 +155,12 @@ $(document).ready(function(){
         ajax: {
             url: '{{ route("campaigns") }}',
             data: function (d) {
-                d.filter_status = $('#filterStatus').val() || [];
+                var statusVals = $('#filterStatus').val() || [];
+                if (statusVals.includes('all')) {
+                    d.filter_status = []; // empty array means no filter
+                } else {
+                    d.filter_status = statusVals;
+                }
                 d.filter_paid = $('#filterPaid').val();
                 d.filter_expired = $('#filterExpired').is(':checked') ? '1' : '';
                 d.filter_typecamp_tg = $('#filterTypecampTg').is(':checked') ? '1' : '';
@@ -142,7 +170,7 @@ $(document).ready(function(){
         },
         lengthMenu: [[10, 25, 50, 100, 200, -1], [10, 25, 50, 100, 200, "All"]],
         pageLength: -1,
-        order: [[0, 'asc'], [2, 'asc']], // Sắp xếp theo status trước, rồi đến end
+        order: [],
         columns: [
             { data: 'status', name: 'status', orderable: false, searchable: false, width: '80px' },
             { data: 'website_name', name: 'website_name', orderable: false, searchable: false },
