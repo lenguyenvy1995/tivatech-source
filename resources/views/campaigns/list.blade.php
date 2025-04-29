@@ -48,7 +48,8 @@
                     <option value="0">Chưa thanh toán</option>
                 </select>
             </div>
-            <div class="col-md-6 d-flex align-items-center">
+            <!-- Removed filterName input field -->
+            <div class="col-md-3 d-flex align-items-center">
                 <div class="form-check mr-3">
                     <input class="form-check-input" type="checkbox" value="1" id="filterExpired">
                     <label class="form-check-label font-weight-bold" for="filterExpired">Sắp hết hạn</label>
@@ -124,7 +125,10 @@ $(document).ready(function(){
     $('#campaigns-table').DataTable({
         processing: true,
         serverSide: true,
-        dom: 'lfrtip',
+        dom: '<"row mb-3"<"col-md-6"l><"col-md-6 text-right"f>>tip',
+        language: {
+            searchPlaceholder: "Tìm kiếm website...",
+        },
         ajax: {
             url: '{{ route("campaigns") }}',
             data: function (d) {
@@ -133,6 +137,7 @@ $(document).ready(function(){
                 d.filter_expired = $('#filterExpired').is(':checked') ? '1' : '';
                 d.filter_typecamp_tg = $('#filterTypecampTg').is(':checked') ? '1' : '';
                 d.filter_typecamp_ns = $('#filterTypecampNs').is(':checked') ? '2' : '';
+                // Removed: d.search = $('#filterName').val();
             }
         },
         lengthMenu: [[10, 25, 50, 100, 200, -1], [10, 25, 50, 100, 200, "All"]],
@@ -156,7 +161,7 @@ $(document).ready(function(){
             ]
     });
 
-    $('#filterStatus, #filterPaid, #filterExpired, #filterTypecampTg, #filterTypecampNs').change(function() {
+    $('#filterStatus, #filterPaid, #filterExpired, #filterTypecampTg, #filterTypecampNs').on('change', function() {
         $('#campaigns-table').DataTable().ajax.reload();
     });
 });

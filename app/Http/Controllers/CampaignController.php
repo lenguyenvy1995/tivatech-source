@@ -160,6 +160,11 @@ class CampaignController extends Controller
                 $query->where('campaigns.user_id', $user->id);
             }
 
+            // Lọc theo tên website nếu có search
+            if ($request->filled('search.value')) {
+                $query->where('website.name', 'like', '%' . $request->input('search.value') . '%');
+            }
+
             return DataTables::of($query)
                 ->addColumn('status', function ($campaign) {
                     $user =Auth::user();
