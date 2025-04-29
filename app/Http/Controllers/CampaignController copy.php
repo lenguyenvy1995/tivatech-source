@@ -96,28 +96,19 @@ class CampaignController extends Controller
     {
         $user = Auth::user();
 
-        // Query chính với các field cụ thể cần dùng (tối ưu từ ban đầu)
         $query = Campaign::query()
             ->select('id', 'website_id', 'user_id', 'start', 'end', 'payment', 'budgetmonth', 'status_id', 'typecamp_id', 'paid', 'vat')
-            ->with(['website:id,name', 'user:id,fullname', 'status:id,name,theme']) // Load nhẹ relation
-            ->withCount('budgets'); // lấy nhanh số lượng budgets
-        // Điều kiện role
-        if ($user->hasRole('saler')) {
-            $query->where('user_id', $user->id)->whereIn('status_id', ['1', '2']);
-        } elseif ($user->hasRole('admin|manager|techads')) {
-            $query->whereIn('status_id', ['1', '2']);
+            ->with(['website:id,name', 'user:id,fullname', 'status:id,name,theme'])
+            ->withCount('budgets');
+
+        if ($user->hasRole(['admin', 'manager', 'techads'])) {
+            $query->whereIn('status_id', [1, 2]);
+        } elseif ($user->hasRole('saler')) {
+            $query->where('user_id', $user->id)
+                  ->whereIn('status_id', [1, 2]);
         } else {
-            return response()->json(['data' => []]);
+            $query->where('id', 0);
         }
-        // Lấy câu lệnh SQL và bindings
-        $sql = $query->toSql();
-        $bindings = $query->getBindings();
-
-        // Xem câu truy vấn hoàn chỉnh
-        $fullSql = vsprintf(str_replace('?', "'%s'", $sql), $bindings);
-
-        // Hoặc sử dụng dd() để kiểm tra ngay trên trình duyệt
-        dd($fullSql);
 
         // Các bộ lọc nhanh
         if ($request->filter_paid == '1') $query->where('paid', 0);
@@ -151,7 +142,7 @@ class CampaignController extends Controller
                 $q->where('name', 'like', '%' . $request->search . '%');
             });
         }
-        dd($query->toSql(), $query->getBindings());
+
         // DataTables server-side xử lý
         if ($request->ajax()) {
             return DataTables::of($query)
