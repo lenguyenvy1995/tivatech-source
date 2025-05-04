@@ -32,7 +32,7 @@
 <div class="card">
     <div class="card-body">
         <div class="row mb-3">
-            <div class="col-md-2">
+            <div class="col-md-3">
                 <select id="filterStatus" class="form-control select2" multiple="multiple" data-placeholder="Chọn trạng thái" style="width: 100%;">
                     <option value="all">Chọn tất cả</option>
                     <option value="1" selected>Hoạt động</option>
@@ -42,7 +42,7 @@
                     <option value="5">Setup</option>
                 </select>
             </div>
-            <div class="col-md-2">
+            <div class="col-md-3">
                 <select id="filterPaid" class="form-control">
                     <option value="">-- Lọc thanh toán --</option>
                     <option value="1">Đã thanh toán</option>
@@ -50,7 +50,7 @@
                 </select>
             </div>
             @if (Auth::user()->hasRole(['admin', 'techads']))
-            <div class="col-md-2">
+            <div class="col-md-3">
                 <select id="filterUser" class="form-control select2" data-placeholder="Chọn nhân viên" style="width: 100%;">
                     <option value="">-- Chọn nhân viên --</option>
                     @foreach(\App\Models\User::where('status', 1)->get() as $user)

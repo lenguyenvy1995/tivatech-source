@@ -235,8 +235,8 @@ class CampaignController extends Controller
                             </div>';
                 })
                 ->addColumn('duration', function ($campaign) {
-                    $start = $campaign->start ? Carbon::parse($campaign->start)->format('d-m-Y') : '';
-                    $end = $campaign->end ? Carbon::parse($campaign->end)->format('d-m-Y') : '';
+                    $start = $campaign->start ? Carbon::parse($campaign->start)->format('H:i d-m-Y') : '';
+                    $end = $campaign->end ? Carbon::parse($campaign->end)->format('H:i d-m-Y') : '';
                     return "<div><strong>Bắt đầu:</strong> $start<br><strong>Kết thúc:</strong> $end</div>";
                 })
                 ->addColumn('budget_payment', function ($campaign) {
@@ -271,8 +271,9 @@ class CampaignController extends Controller
                     $runningDays = round($campaign->total_calu ?? 0, 1);
                     $totalDays = 0;
 
+                    // Updated: Always count both start and end dates as inclusive
                     if ($start && $end) {
-                        $totalDays = $start->diffInDays($end) + 1; // cộng thêm 1 ngày tính cả hôm nay
+                        $totalDays = $start->diffInDays($end) + 1;
                     }
 
                     $notification = '';
@@ -449,7 +450,11 @@ class CampaignController extends Controller
 
     public function edit($id)
     {
-        $campaign = Campaign::findOrFail($id); // Lấy dữ liệu Campaign theo ID
+        // Lấy dữ liệu Campaign theo ID, kèm thông tin website
+        $campaign = Campaign::with('website')->findOrFail($id);
+        if (request()->ajax()) {
+            return response()->json($campaign);
+        }
         $domains = Website::all(); // Giả sử bạn muốn danh sách website cho dropdown
         return view('campaigns.edit', compact('campaign', 'domains'));
     }
@@ -484,6 +489,14 @@ class CampaignController extends Controller
         $request->merge(['end' => $endDate]);
         $campaign = Campaign::findOrFail($id);
         $campaign->update($request->all()); // Cập nhật Campaign
+        if ($request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Cập nhật chiến dịch thành công !',
+                'website_id' => $campaign->website->id,
+                'redirect_url' => route('campaigns.show', $campaign->id),
+            ]);
+        }
         return redirect()->route('websites.campaigns', $campaign->website->id)->with('success', 'Campaign đã được cập nhật thành công.');
     }
     public function destroy($id)
