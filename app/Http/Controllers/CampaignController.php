@@ -91,7 +91,6 @@ class CampaignController extends Controller
     public function list(Request $request)
     {
         $user = Auth::user();
-
         if ($request->ajax()) {
             $query = Campaign::query()
                 ->select([

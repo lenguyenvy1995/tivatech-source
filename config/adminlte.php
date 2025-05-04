@@ -446,18 +446,17 @@ return [
             'icon' => 'fas fa-key',
             'can' => 'manage users', // Chỉ hiển thị cho role:admin
         ],
-        ['header' => 'QUẢN LÝ THIẾT KẾ WEBSITE',
-        'can' => 'designer|admin', // Chỉ hiển thị cho role:admin
+       [
+           'header' => 'QUẢN LÝ THIẾT KẾ WEBSITE',
+           'can' => ['Design Marketing'], // Chỉ hiển thị cho role:admin
+       ],
 
-        ],
-
-        [
-            'text' => 'Quản lý Website',
-            'url'  => 'design-websites',
-            'icon' => 'fas fa-globe',
-            'can' => 'designer|admin', // Chỉ hiển thị cho role:admin
-
-        ],
+       [
+           'text' => 'Quản lý Website',
+           'url'  => 'design-websites',
+           'icon' => 'fas fa-globe',
+           'can' => ['Design Marketing'], // Chỉ hiển thị cho role:admin
+       ],
         // Phân cách
         [
             'header' => 'LƯƠNG NHÂN VIÊN',
