@@ -97,6 +97,13 @@ class Campaign extends Model
     {
         return $this->belongsTo('App\Models\User');
     }
+    /**
+     * Quan hệ với tech 
+     */
+    public function tech(): BelongsTo
+    {
+        return $this->belongsTo('App\Models\User');
+    }
 
     /**
      * Quan hệ với SetupWeb
@@ -105,4 +112,8 @@ class Campaign extends Model
     {
         return $this->hasOne('App\Models\SetupWeb');
     }
+    public function budgetsAll()
+{
+    return $this->hasMany(\App\Models\Budget::class);
+}
 }

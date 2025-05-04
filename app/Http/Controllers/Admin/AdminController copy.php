@@ -198,85 +198,142 @@ class AdminController extends Controller
     //hiệu suất và chi phí chạy theo ngày
     public function datePerformance(Request $request)
     {
-        $date = $request->has('date') ? Carbon::parse($request->date)->format('Y-m-d') : Carbon::today()->toDateString();
-
+        // Kiểm tra xem ngày có được gửi lên hay không, nếu không thì mặc định là hôm nay
+        if ($request->has('date')) {
+            $date = Carbon::parse($request->date)->format('Y-m-d',);
+        } else {
+            $date = Carbon::today()->toDateString();
+        }
         if ($request->ajax()) {
-            $campaigns = Campaign::with([
-                'website',
-                'budgets' => function ($query) use ($date) {
-                    $query->whereDate('date', $date);
-                },
-                'budgetsAll',
-                'user'
-            ])
-            ->whereIn('status_id', [1, 2])
-            ->whereHas('budgets', function ($q) use ($date) {
-                $q->whereDate('date', $date);
-            })
-            ->get();
-
-            $campaigns->each(function ($campaign) {
-                $actualCost = $campaign->budgetsAll->sum('budget');
-                $daysRan = $campaign->budgetsAll->where('calu', '<>', 0)->sum('calu');
+            // Điều chỉnh trường ngày theo cấu trúc bảng của bạn
+            $query = Campaign::with(['website', 'budgets'])
+                ->whereIn('status_id', [1, 2])
+                ->whereHas('budgets', function ($q) use ($date) {
+                    $q->whereDate('date', $date);
+                });
+            $query = $query->get()->map(function ($campaign) use ($date) {
+                // Tính toán tổng chi phí
+                $actualCost = $campaign->budgets()->sum('budget');
+                $daysRan = $campaign->budgets()->where('calu', '<>', 0)->sum('calu');
                 $expectedCost = ($campaign->budgetmonth / 30) * $daysRan;
-                $campaign->total_profit = $expectedCost > 0 ? 100 - intval($actualCost / $expectedCost * 100) : 0;
-            });
 
-            return DataTables::of($campaigns)
-                ->addIndexColumn()
-                ->addColumn('website_name', fn($c) => '<a href="' . route('campaigns.budgets', $c->id) . '" target="_blank">' . $c->website->name . '</a>')
-                ->addColumn('budget', fn($c) => $c->budgetmonth / 30)
-                ->addColumn('cost', fn($c) => '<span data-toggle="tooltip" data-placement="top" title="' . $c->budgets->pluck('account')->unique()->first() . '">' . number_format($c->budgets->sum('budget')) . '</span>')
-                ->addColumn('profit', fn($c) => $c->budgetmonth ? intval((($c->budgetmonth / 30 - $c->budgets->sum('budget')) / ($c->budgetmonth / 30)) * 100) . ' %' : '0 %')
-                ->addColumn('total_profit', fn($c) => $c->total_profit)
-                ->addColumn('expired', function ($c) {
+                // Kiểm tra tránh chia cho 0
+                if ($expectedCost > 0) {
+                    $totalProfit = (100 - intval($actualCost / $expectedCost * 100));
+                } else {
+                    $totalProfit = 0; // Hoặc xử lý mặc định khác
+                }
+
+                $campaign->total_profit = $totalProfit; // Thêm thuộc tính total_profit vào model
+
+                return $campaign;
+            });
+            return DataTables::of($query)
+
+                ->addIndexColumn() // Thêm cột STT
+
+                ->addColumn('website_name', function ($campaign) {
+                    $res = '';
+                    $res .= '<a href="' . route('campaigns.budgets', $campaign->id) . '" target="_blank">' . $campaign->website->name . '</a>';
+                    return $res;
+                })
+                ->addColumn('budget', function ($campaign) {
+                    return $campaign->budgetmonth / 30; // Tính ngân sách trung bình hàng ngày
+                })
+                ->addColumn('cost', function ($campaign) use ($date) {
+                    // Lấy danh sách accounts từ budgets liên quan
+                    $cost = $campaign->budgets()
+                        ->whereDate('date', $date)
+                        ->sum('budget');
+                    $account = $campaign->budgets()
+                        ->whereDate('date', $date)
+                        ->pluck('account')
+                        ->unique()
+                        ->first();
+                    return '<span data-toggle="tooltip" data-placement="top" title="' . $account . '">' . number_format($cost) . '</span>';
+                })
+                ->addColumn('profit', function ($campaign) use ($date) {
+                    // Tính lợi nhuận trong ngày: revenue - cost
+                    $revenue = $campaign->budgetmonth ? $campaign->budgetmonth / 30 : 0;
+                    $cost = $campaign->budgets()
+                        ->whereDate('date', $date)
+                        ->sum('budget');
+                    return intval(($revenue - $cost) / $revenue * 100) . ' %';
+                })
+                ->addColumn('total_profit', function ($campaign) {
+                    return $campaign->total_profit;
+                })
+                ->addColumn('expired', function ($campaign) {
                     $res = '<div ';
-                    if ($c->typecamp_id == 1) {
-                        $res .= 'class="callout callout-info p-1 m-0 text-center">';
-                        $start = $c->start ? Carbon::parse($c->start) : null;
-                        $end = $c->end ? Carbon::parse($c->end) : null;
+                    if ($campaign->typecamp_id == 1) {
+                        $res .= 'class="callout callout-info p-1 m-0 text-center" >';
+                        $start = $campaign->start ? Carbon::parse($campaign->start) : null;
+                        $end = $campaign->end ? Carbon::parse($campaign->end) : null;
                         if ($start && $end) {
                             $days = $start->diffInDays($end) + 1 ?: 1;
-                            $budgetCount = $c->budgetsAll->sum('calu');
+                            $budgetCount = $campaign->budgets->sum('calu');
                             $remainingDays = $days - $budgetCount;
                             if ($budgetCount + 1 >= $days) {
-                                $res .= '<h5><span class="badge badge-pill badge-' . ($budgetCount > $days ? 'danger' : 'warning') . '">Hết Hạn ' . $remainingDays . ' Ngày </span></h5>';
+                                if ($budgetCount + 1 == $days) {
+                                    $res .= '<h5><span class="badge badge-pill badge-warning">Còn ' . $remainingDays . ' Ngày </span></h5>';
+                                } elseif ($budgetCount > $days) {
+                                    $res .= '<h5><span class="badge badge-pill badge-danger">HẾT HẠN ' . $remainingDays . ' Ngày</span></h5>';
+                                } else {
+                                    $res .= '<h5><span class="badge badge-pill badge-danger">HẾT HẠN </span></h5>';
+                                }
                             } else {
                                 $res .= $remainingDays . ' Ngày <br>';
                             }
-                            $res .= $budgetCount . ' / ' . $days;
                         }
-                    } elseif ($c->typecamp_id == 2) {
-                        $res .= 'class="callout callout-danger m-0 p-1 text-center">';
-                        $totalBudget = $c->budgetsAll->sum('budget');
-                        $remainingBudget = $c->payment - $totalBudget;
-                        $threshold = $c->budgetmonth / 30 + ($c->budgetmonth / 30 / 2);
-                        $res .= number_format($remainingBudget <= $threshold ? $remainingBudget : $c->payment - $totalBudget);
+
+                        $cl = '';
+                        $res .= $campaign->budgets->sum('calu') . ' / ' . $days;
+                    } elseif ($campaign->typecamp_id == 2) {
+                        $res .= 'class="callout callout-danger m-0 p-1 text-center" >';
+                        $totalBudget = $campaign->budgets ? $campaign->budgets->sum('budget') : 0;
+                        $remainingBudget = $campaign->payment - $totalBudget;
+                        $threshold = $campaign->budgetmonth / 30 + ($campaign->budgetmonth / 30 / 2);
+
+                        if ($remainingBudget <= $threshold) {
+                            $res .= number_format($remainingBudget);
+                        } else {
+                            $res .= number_format($campaign->payment - $totalBudget);
+                        }
                     }
                     return $res . '</div>';
                 })
-                ->addColumn('saler', fn($c) => $c->user->fullname ?? 'N/A')
-                ->addColumn('warning', function ($c) use ($date) {
-                    $revenue = $c->budgetmonth ? $c->budgetmonth / 30 : 0;
-                    $cost = $c->budgets->sum('budget');
+                ->addColumn('saler', function ($campaign) {
+                    return $campaign->user->fullname ?? 'N/A'; // Lấy tên nhân viên saler
+                })
+                ->addColumn('warning', function ($campaign) use ($date) {
+                    // Lấy profit
+                    $revenue = $campaign->budgetmonth ? $campaign->budgetmonth / 30 : 0;
+                    $cost = $campaign->budgets()->whereDate('date', $date)->sum('budget');
                     $profit = ($revenue > 0) ? intval(100 - ($cost / $revenue) * 100) : 0;
 
-                    $actualCost = $c->budgetsAll->sum('budget');
-                    $daysRan = $c->budgetsAll->where('calu', '<>', 0)->sum('calu');
-                    $expectedCost = ($c->budgetmonth / 30) * $daysRan;
+                    // Tính total_profit
+                    $actualCost = $campaign->budgets()->sum('budget');
+                    $daysRan = $campaign->budgets()->where('calu', '<>', 0)->sum('calu');
+                    $expectedCost = ($campaign->budgetmonth / 30) * $daysRan;
                     $totalProfit = ($expectedCost > 0) ? intval(100 - ($actualCost / $expectedCost) * 100) : 0;
 
+                    // Xác định class bg theo điều kiện
+                    $res = '';
                     if ($profit < 0 && $totalProfit < 0) {
-                        return '<span class="badge bg-danger">Cần Giảm Chi Phí</span>';
+                        $res = '<span class="badge bg-danger">Cần Giảm Chi Phí</span>';
                     } elseif ($profit < 0) {
-                        return '<span class="badge bg-warning">Giảm Ngân Sách</span>';
+                        $res = '<span class="badge bg-warning">Giảm Ngân Sách</span>';
                     } elseif ($totalProfit < 0) {
-                        return '<span class="badge bg-info">Tăng Lợi Nhuận</span>';
+                        $res = '<span class="badge bg-info">Tăng Lợi Nhuận</span>';
+                    } else {
+                        $res = '<span class="badge bg-success">Hoạt Động Tốt</span>';
                     }
-                    return '<span class="badge bg-success">Hoạt Động Tốt</span>';
+
+                    return $res;
                 })
-                ->rawColumns(['cost', 'warning', 'website_name', 'expired'])
+                ->rawColumns(['cost', 'warning', 'website_name', 'expired']) // Cho phép HTML trong cột warning
                 ->toJson();
+            // ->make(true);
         }
 
         return view('admin.datePerformance');

@@ -88,7 +88,14 @@
                 data: function(d) {
                     d.date = $('#dateBq').val();
                 },
-                dataSrc: 'data' // Đảm bảo ánh xạ tới `data` trong JSON trả về
+                dataSrc: 'data', // Đảm bảo ánh xạ tới `data` trong JSON trả về
+                error: function(xhr, status, error) {
+                    console.log('Lỗi AJAX:', {
+                        status: status,
+                        error: error,
+                        response: xhr.responseText
+                    });
+                }
             },
             columns: [
                 { data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false }, // Cột STT

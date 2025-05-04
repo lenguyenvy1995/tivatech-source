@@ -22,7 +22,22 @@
                     <div class="form-group">
                         <label>Website: <span id="domain"></span> </label>
                     </div>
-
+                    <!-- Kỹ Thuật viên -->
+                    <div class="form-group">
+                        <label>Kỹ Thuật:</label>
+                        <select class="form-control" name="tech_id" id="tech_id">
+                            <option value=""> Chọn Kỹ Thuật </option>
+                            @foreach (App\Models\User::where('roles_id', 4)->where('status', 1)->get() as $tech)
+                                <option value="{{ $tech->id }}"
+                                    {{ old('tech_id', $campaign->tech_id ?? '') == $tech->id ? 'selected' : '' }}>
+                                    {{ $tech->fullname }}
+                                </option>
+                            @endforeach
+                        </select>
+                        @error('tech_id')
+                            <span class="text-danger">{{ $message }}</span>
+                        @enderror
+                    </div>
                     <div class="form-group">
                         <label>Vị Trí:</label>
                         <input type="text" class="form-control" name="top_position"
@@ -75,6 +90,7 @@
                             <span class="text-danger">{{ $message }}</span>
                         @enderror
                     </div>
+
                     <div class="form-group">
                         <label>Ngân Sách:</label>
                         <input type="text" class="form-control" name="budgetmonth" id="budgetmonth"
@@ -118,7 +134,8 @@
                             <label class="form-check-label" for="vat1">Chưa xuất</label>
                         </div>
                         <div class="form-check form-check-inline">
-                            <input class="form-check-input" type="radio" name="vat" id="vat2" value="2">
+                            <input class="form-check-input" type="radio" name="vat" id="vat2"
+                                value="2">
                             <label class="form-check-label" for="vat2">Đã xuất</label>
                         </div>
                     </div>
@@ -226,6 +243,8 @@
                         } else if (hour === '12') {
                             $('#startHour12').prop('checked', true);
                         }
+                        // Gán kỹ thuật viên được chọn
+                        $('#tech_id').val(data.tech_id);
                         $('input[name="end"]').val(moment(data.end).format('DD-MM-YYYY HH:mm'));
                         $('textarea[name="keywords"]').val(data.keywords);
                         $('textarea[name="notes"]').val(data.notes);

@@ -130,7 +130,7 @@ Route::middleware('auth')->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
     // Routes cho Saler
-    Route::middleware(['role:saler'])->group(function () {
+    Route::middleware(['role:saler|quote manager|admin'])->group(function () {
         Route::resource('quote-requests', QuoteRequestController::class);
     });
     // Routes cho Bộ phận báo giá

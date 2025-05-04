@@ -107,6 +107,7 @@ class CampaignController extends Controller
                     'campaigns.vat',
                     'website.name as website_name',
                     'users.fullname as user_fullname',
+                    'tech.fullname as tech_fullname', // <-- fullname của tech_id
                     'status.name as status_name',
                     'status.theme as status_theme',
                     DB::raw('(SELECT SUM(budget) FROM budgets WHERE budgets.campaign_id = campaigns.id) as total_budgets'),
@@ -115,6 +116,7 @@ class CampaignController extends Controller
                 ])
                 ->leftJoin('website', 'website.id', '=', 'campaigns.website_id')
                 ->leftJoin('users', 'users.id', '=', 'campaigns.user_id')
+                ->leftJoin('users as tech', 'tech.id', '=', 'campaigns.tech_id') // join cho tech_id
                 ->leftJoin('status', 'status.id', '=', 'campaigns.status_id');
 
             // Lọc trạng thái: nếu filter_status được chọn thì lọc đúng trạng thái, nếu không thì mặc định chỉ lấy 1 và 2
@@ -231,6 +233,7 @@ class CampaignController extends Controller
                     return '<div>
                                 <a href="' . $url . '" target="_blank" style="font-weight:bold;">' . $campaign->website_name . '</a>
                                 <br><small class="text-muted">Saler: ' . ($campaign->user_fullname ?? 'Không có') . '</small>
+                                <br><small class="text-muted">Kỹ thuật: ' . ($campaign->tech_fullname ?? 'Không có') . '</small>
                             </div>';
                 })
                 ->addColumn('duration', function ($campaign) {
@@ -570,8 +573,8 @@ class CampaignController extends Controller
 
         // Cập nhật status_id thành 1 (hoàn thành setup)
         $campaign->status_id = 1;
+        $campaign->tech_id = Auth::id();
         $campaign->save();
-
         return response()->json(['success' => 'Campaign đã được setup thành công.']);
     }
     //bảng tính lương dự kiến
