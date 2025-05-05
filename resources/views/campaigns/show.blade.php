@@ -33,7 +33,7 @@
                         @if (isset($campaign))
                             <table class="table table-bordered">
                                 <tr><th>Website</th><td>{{ $campaign->website->name }}</td></tr>
-                                <tr><th>Kỹ thuật</th><td>{{ $campaign->tech->fullname }}</td></tr>
+                                <tr><th>Kỹ thuật</th><td>{{ $campaign->tech?->fullname ?? '' }}</td></tr>
                                 <tr><th>Vị trí</th><td>{{ $campaign->top_position }}</td></tr>
                                 <tr><th>Khu vực</th><td>{{ $campaign->region }}</td></tr>
                                 <tr><th>Loại đối sánh</th><td>{{ $campaign->keyword_type == 0 ? 'Đối Sánh Chính Xác' : 'Đối Sánh Cụm Từ' }}</td></tr>
