@@ -13,6 +13,7 @@ use Yajra\DataTables\Facades\DataTables;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
+
 class CampaignController extends Controller
 {
     public function index(Request $request, Website $website)
@@ -137,11 +138,11 @@ class CampaignController extends Controller
                         $q1->where('typecamp_id', 2)
                             ->whereRaw('(payment - (SELECT COALESCE(SUM(budget), 0) FROM budgets WHERE campaign_id = campaigns.id)) <= (budgetmonth / 30)');
                     })
-                    ->orWhere(function ($q2) {
-                        // Trọn gói: sắp hết ngày chạy
-                        $q2->where('typecamp_id', 1)
-                            ->whereRaw('((SELECT COALESCE(SUM(calu), 0) FROM budgets WHERE campaign_id = campaigns.id)) >= (DATEDIFF(end, start) + 1 - 2)');
-                    });
+                        ->orWhere(function ($q2) {
+                            // Trọn gói: sắp hết ngày chạy
+                            $q2->where('typecamp_id', 1)
+                                ->whereRaw('((SELECT COALESCE(SUM(calu), 0) FROM budgets WHERE campaign_id = campaigns.id)) >= (DATEDIFF(end, start) + 1 - 2)');
+                        });
                 });
             }
             // Lọc theo loại chiến dịch
@@ -185,7 +186,7 @@ class CampaignController extends Controller
 
             return DataTables::of($query)
                 ->addColumn('status', function ($campaign) {
-                    $user =Auth::user();
+                    $user = Auth::user();
                     $statusList = [
                         1 => ['name' => 'hoạt động', 'color' => '#28a745'],
                         2 => ['name' => 'tạm dừng', 'color' => '#ffc107'],
@@ -222,7 +223,7 @@ class CampaignController extends Controller
                 })
                 ->addColumn('website_name', function ($campaign) {
                     // $url = route('campaigns.budgets', ['campaignId' => $campaign->id]);
-                    $user =Auth::user();
+                    $user = Auth::user();
                     $url = '/campaigns/' . $campaign->id . '/budgets';
                     if ($user && $user->hasRole('saler')) {
                         return '<div>
@@ -285,7 +286,7 @@ class CampaignController extends Controller
                         if ($remainingDays > 2) {
                             $notification = '<div><small class="badge badge-success">Còn ' . $remainingDays . ' ngày</small></div>';
                         } elseif ($remainingDays > 0.5 && $remainingDays <= 2) {
-                            $notification = '<div><small class="badge badge-warning">Còn '. $remainingDays .' ngày</small></div>';
+                            $notification = '<div><small class="badge badge-warning">Còn ' . $remainingDays . ' ngày</small></div>';
                         } elseif ($remainingDays <= 0.5) {
                             $notification = '<div><small class="badge badge-danger">Hết hạn ' . $remainingDays . ' ngày</small></div>';
                         }
@@ -314,20 +315,22 @@ class CampaignController extends Controller
                         $notes = explode("\n", $campaign->latest_note);
                         $html = '';
                         $limit = 3;
-                
+
                         foreach ($notes as $index => $note) {
                             if ($index < $limit) {
                                 $html .= '👉 ' . e($note) . '<br>';
                             }
                         }
-                
+
                         $html .= '<div class="d-flex align-items-center mt-2">';
                         if (count($notes) > $limit) {
                             $html .= '<button class="btn btn-xs btn-outline-danger mr-1" onclick="toggleNotes(' . $campaign->id . ')">Xem thêm</button>';
                         }
-                        $html .= '<a class="btn btn-xs btn-outline-primary" target="_blank" href='.route('campaigns.listNote',['campaign'=>$campaign->id]).' ">Chi tiết </a>';
+                        if (auth()->user()->hasAnyRole(['admin', 'google ads'])) {
+                            $html .= '<a class="btn btn-xs btn-outline-primary" target="_blank" href=' . route('campaigns.listNote', ['campaign' => $campaign->id]) . ' ">Chi tiết </a>';
+                        }
                         $html .= '</div>';
-                
+
                         if (count($notes) > $limit) {
                             $html .= '<div id="fullNotes' . $campaign->id . '" style="display:none;">';
                             foreach (array_slice($notes, $limit) as $note) {
@@ -335,7 +338,7 @@ class CampaignController extends Controller
                             }
                             $html .= '</div>';
                         }
-                
+
                         return $html;
                     }
                     return '';
