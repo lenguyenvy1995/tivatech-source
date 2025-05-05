@@ -179,9 +179,14 @@ class CampaignController extends Controller
                 $request->filter_typecamp_ns == '2' ||
                 $request->filled('search.value')
             ) {
-                $query->orderBy('campaigns.end');
+                if ($request->filled('search.value')) {
+                    $query->orderBy('campaigns.end', 'desc');
+                }else{
+                    $query->orderBy('campaigns.end');
+
+                }
             } else {
-                $query->orderBy('campaigns.status_id', 'asc')->orderBy('campaigns.end', 'asc');
+                $query->orderBy('campaigns.status_id', 'asc')->orderBy('campaigns.end', 'desc');
             }
 
             return DataTables::of($query)
