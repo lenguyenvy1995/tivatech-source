@@ -249,20 +249,26 @@ class CampaignController extends Controller
                         ? '<del style="color:green; font-weight:bold;">' . $payment . '</del>'
                         : '<span style="color:red; font-weight:bold;">' . $payment . ' 🔥</span>';
                     $vatCheckbox = $campaign->vat != 0 ? '<div class="form-check form-check-inline"><input class="form-check-input toggle-vat" type="checkbox" data-id="' . $campaign->id . '" ' . ($campaign->vat == 2 ? 'checked' : '') . '> VAT</div>' : '';
+                    $role = Auth::user()->hasAnyRole(['admin', 'google ads','Manage all quote requests']);
 
-                    return '
-                        <div class="d-flex flex-column text-center">
-                            <div>
-                                <span>Ngân sách: <strong>' . $budgetmonth . '</strong></span><br>
-                                <span>Thanh toán: ' . $paidBadge . '</span>
-                            </div>
+                    $paymentControls = '';
+                    if ($role) {
+                        $paymentControls = '
                             <div class="mt-2">
                                 <div class="form-check form-check-inline mr-2">
                                     <input type="checkbox" class="form-check-input toggle-paid" data-id="' . $campaign->id . '" ' . ($campaign->paid ? 'checked' : '') . '>
                                     <label class="form-check-label">Thanh toán</label>
                                 </div>
                                 ' . $vatCheckbox . '
+                            </div>';
+                    }
+                    return '
+                        <div class="d-flex flex-column text-center">
+                            <div>
+                                <span>Ngân sách: <strong>' . $budgetmonth . '</strong></span><br>
+                                <span>Thanh toán: ' . $paidBadge . '</span>
                             </div>
+                           ' . $paymentControls . '
                         </div>';
                 })
                 ->addColumn('renew', function ($campaign) {

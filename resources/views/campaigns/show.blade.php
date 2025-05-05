@@ -61,7 +61,7 @@
                                         @endif
                                     </td>
                                 </tr>
-                                <tr><th>Từ khoá</th><td>{{ $campaign->keywords }}</td></tr>
+                                <tr><th>Từ khoá</th><td>{!! nl2br($campaign->keywords) !!}</td></tr>
                                 <tr><th>Ghi chú setup</th><td>{{ $campaign->notes }}</td></tr>
                                 <tr>
                                     <th>Ghi chú chiến dịch</th>
