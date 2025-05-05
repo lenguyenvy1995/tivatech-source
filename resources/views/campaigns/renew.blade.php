@@ -11,16 +11,16 @@
         <div class="card" style="width:1200px">
 
             <div class="card-body">
-                <form id="setupForm" method="POST" action="{{ route('campaigns.update', ['id' => $campaign->id]) }}">
+                <form id="setupForm" method="POST" action="{{ route('campaigns.store') }}">
                     @csrf
-                    @method('PUT')
                     @if ($errors->any())
                         @foreach ($errors->all() as $error)
                             <p class="text-center">{{ $error }}</p>
                         @endforeach
                     @endif
                     <div class="form-group">
-                        <label>Website: <span id="domain"></span> </label>
+                        <label>Website: <span id="fdomain"></span> </label>
+                        <input type="hidden" name="domain" id="domain" value="{{ $campaign->website->name }}">  
                     </div>
 
                     <div class="form-group">
@@ -221,7 +221,7 @@
 
                         $('textarea[name="keywords"]').val(data.keywords);
                         $('textarea[name="notes"]').val(data.notes);
-                        $('#domain').text(data.website.name);
+                        $('#fdomain').text(data.website.name);
                         const startMomentOld = moment(data.start);
                         const endMomentOld = moment(data.end);
                         const startMoment = moment(); // hôm nay
@@ -269,7 +269,8 @@
                     success: function(response) {
                         toastr.success(response.message);
                         // Chuyển hướng về trang danh sách chiến dịch
-                        window.location.href = response.redirect_url;
+                        window.location.href = "/campaigns/setups";
+
                     },
                     error: function(xhr) {
                         if (xhr.status === 422) {
@@ -284,6 +285,8 @@
                                         '<span class="text-danger">' + messages[0] +
                                         '</span>');
                                 }
+                                console.log('Field: ' + field + ', Messages: ' + messages);
+                                
                             });
                         } else {
                             toastr.error('Có lỗi xảy ra. Vui lòng kiểm tra lại.');
