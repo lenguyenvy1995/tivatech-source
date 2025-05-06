@@ -140,12 +140,11 @@ $(document).ready(function () {
         let pc_rice = parseFloat($('#actual_work_days').val()) * 20000 || 0;
         let pc_phone = parseFloat($('#phone_allowance').val()) || 0;
         let bonus = parseFloat($('#bonus').val()) || 0;
-        let other_expenses = parseFloat($('#other_expenses').val()) || 0;
+        let other_expenses = parseFloat($('#other_orther').val()) || 0;
         let other_cost = parseFloat($('#rs-othercost').text().replace(/,/g, '')) || 0; // Tổng chi phí phát sinh
 
         let total = bhxh + attendance_bonus + pc_rice + pc_phone + bonus + other_expenses + other_cost;
         $('#rs-tong-hop').text(formatNumber(total));
-
         return total;
     }
     function total_salary() {
