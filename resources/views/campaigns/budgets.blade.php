@@ -15,7 +15,7 @@
             </button>
 
             <!-- Modal -->
-            <div class="modal fade" id="addBudgetModal" tabindex="-2" role="dialog" >
+            <div class="modal fade" id="addBudgetModal" tabindex="-2" role="dialog">
                 <div class="modal-dialog" role="document">
                     <div class="modal-content">
                         <div class="modal-header">
@@ -50,6 +50,7 @@
                         <th>STT</th>
                         <th>Ngày Chạy</th>
                         <th>Chi Phí</th>
+                        <th width="300px">Tài khoản</th>
                         <th>Tính Ngày</th>
                         <th>Action</th>
                     </tr>
@@ -105,7 +106,7 @@
                         name: 'stt',
                         searchable: false,
                         orderable: false,
-                        render: function (data, type, row, meta) {
+                        render: function(data, type, row, meta) {
                             return meta.row + 1;
                         }
                     },
@@ -118,6 +119,11 @@
                     {
                         data: 'budget',
                         name: 'budget',
+                        class: 'text-right',
+
+                    }, {
+                        data: 'account',
+                        name: 'account',
                         class: 'text-right',
 
                     },
@@ -145,7 +151,7 @@
                 }, 500);
             });
 
-           
+
             $('#addBudget').on('click', function() {
                 $('#addBudgetModal').modal('show'); // Đóng modal
 
@@ -168,7 +174,7 @@
                         $('#addBudgetForm')[0].reset(); // Reset form
                         table.ajax.reload(); // Reload Datatable
                         toastr.success('Budget added successfully!');
-                        
+
                     },
                     error: function(err) {
                         toastr.error('Error: ' + (err.responseJSON.message ||
@@ -233,9 +239,9 @@
                 }
             });
             $(document).on('change', '.changeCalu', function() {
-                const budgetId = $(this).data('id');                
+                const budgetId = $(this).data('id');
                 const caluValue = $(this).val();
-                
+
                 $.ajax({
                     url: '{{ route('budgets.updateCalu') }}', // Thay bằng route thực tế
                     method: 'POST',
