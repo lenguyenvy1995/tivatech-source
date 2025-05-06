@@ -46,7 +46,7 @@
                     <tr>
                         <td>BHXH</td>
                         <td class="text-right" id="rs-bhxh">
-                           - {{ $salary->bhxh ? number_format($salary->bhxh, 0, ',', '.') : '' }}</td>
+                           {{ $salary->bhxh ? number_format($salary->bhxh, 0, ',', '.') : '' }}</td>
                     </tr>
                     <tr>
                         <td>Chuyên cần</td>

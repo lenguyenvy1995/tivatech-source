@@ -603,6 +603,7 @@ $(document).ready(function () {
             totalHoaHong += parseFloat(data.hoa_hong) || 0;
         });
         $('#rs-othercost').text(formatNumber(totalHoaHong));
+        $('#other_cost').val(totalHoaHong);
         $('#rs-tong-hop').text(formatNumber(cost_tong_hop()));
 
         total_salary();

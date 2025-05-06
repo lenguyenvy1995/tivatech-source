@@ -110,7 +110,14 @@ class SalaryController extends Controller
 
     public function store(Request $request)
     {
-
+        // dd($request->all());
+        // Kiểm tra xem người dùng đã tồn tại trong bảng lương hay chưa
+        $existingSalary = Salary::where('user_id', $request->input('user_id'))
+            ->where('month_salary', $request->input('month'))
+            ->first();
+        if ($existingSalary) {
+            return redirect()->route('salaries.index')->with('error', 'Bảng lương đã tồn tại cho nhân viên này trong tháng này.');
+        }
         $salary = Salary::create([
             'user_id' => $request->input('user_id'),
             'form_salary' => $request->input('salary_type'),
@@ -124,7 +131,7 @@ class SalaryController extends Controller
             'doanh_thu' => $request->input('doanhSo'),
             'hoa_hong' => $request->input('kpi'),
             'worked_salary' => $request->input('real_salary'),
-            'other_cost' => $request->input('other_expenses'),
+            'other_cost' => $request->input('other_cost'),
             'total_salary' => $request->input('t_total_salary'),
             'bonus_salary' => $request->input('bonus'),
             'bhxh' => $request->input('bhxh'),
