@@ -234,6 +234,7 @@ class CampaignController extends Controller
                         return '<div>
                             <a style="font-weight:bold;"> ' . $campaign->website_name . '</a>
                             <br><small class="text-muted">Saler: ' . ($campaign->user_fullname ?? 'Không có') . '</small>
+                             <br><small class="text-muted">Kỹ thuật: ' . ($campaign->tech_fullname ?? 'Không có') . '</small>
                         </div>';
                     }
                     return '<div>
