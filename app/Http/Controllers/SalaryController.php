@@ -130,7 +130,7 @@ class SalaryController extends Controller
             'base_salary' => $request->input('base_salary'),
             'doanh_thu' => $request->input('doanhSo'),
             'hoa_hong' => $request->input('kpi'),
-            'worked_salary' => $request->input('real_salary'),
+            'worked_salary' => $request->input('worked_salary'),
             'other_cost' => $request->input('other_cost'),
             'total_salary' => $request->input('t_total_salary'),
             'bonus_salary' => $request->input('bonus'),

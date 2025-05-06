@@ -140,7 +140,7 @@ $(document).ready(function () {
         let pc_rice = parseFloat($('#actual_work_days').val()) * 20000 || 0;
         let pc_phone = parseFloat($('#phone_allowance').val()) || 0;
         let bonus = parseFloat($('#bonus').val()) || 0;
-        let other_expenses = parseFloat($('#other_orther').val()) || 0;
+        let other_expenses = parseFloat($('#other_expenses').val()) || 0;
         let other_cost = parseFloat($('#rs-othercost').text().replace(/,/g, '')) || 0; // Tổng chi phí phát sinh
 
         let total = bhxh + attendance_bonus + pc_rice + pc_phone + bonus + other_expenses + other_cost;
@@ -148,15 +148,11 @@ $(document).ready(function () {
         return total;
     }
     function total_salary() {
-        let real_salary = parseFloat($('#rs-real-salary').text().replace(/[,.]/g, '')) || 0; // Lương thực tế       
+        let worked_salary = parseFloat($('#rs-real-salary').text().replace(/[,.]/g, '')) || 0; // Lương thực tế       
         let kpi = parseFloat($('#rs-kpi').text().replace(/[,.]/g, '')) || 0; // Tổng chi phí phát sinh        
         let other_cost = parseFloat($('#rs-tong-hop').text().replace(/[,.]/g, '')) || 0; // Tổng chi phí phát sinh        
-        let total_salary = real_salary + kpi + other_cost;
-        console.log(real_salary);
-        console.log(kpi);
-        console.log(other_cost);
-        console.log(total_salary);
-        
+        let total_salary = worked_salary + kpi + other_cost;     
+        $('#worked_salary').val(worked_salary);
         $('#t_total_salary').val(total_salary);
         $('#rs-total-salary').text(formatNumber(total_salary));
     }

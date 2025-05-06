@@ -56,7 +56,8 @@
             <label for="real_salary">Lương thực tế</label>
             <input type="text" id="actual_salary" name="actual_salary" class="form-control"
                 value="0" readonly>
-
+                <input type="hidden" id="worked_salary" name="worked_salary" class="form-control"
+                value="">
             <input type="hidden" id="t_total_salary" name="t_total_salary" class="form-control"
                 value="">
         </div>
