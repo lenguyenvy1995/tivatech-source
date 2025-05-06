@@ -338,7 +338,7 @@ class CampaignController extends Controller
                         if (count($notes) > $limit) {
                             $html .= '<button class="btn btn-xs btn-outline-danger mr-1" onclick="toggleNotes(' . $campaign->id . ')">Xem thêm</button>';
                         }
-                        if (auth()->user()->hasAnyRole(['admin', 'google ads'])) {
+                        if (auth()->user()->hasAnyRole(['admin', 'google ads','techads'])) {
                             $html .= '<a class="btn btn-xs btn-outline-primary" target="_blank" href=' . route('campaigns.listNote', ['campaign' => $campaign->id]) . ' ">Chi tiết </a>';
                         }
                         $html .= '</div>';
