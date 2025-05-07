@@ -201,19 +201,27 @@ class AdminController extends Controller
         $date = $request->has('date') ? Carbon::parse($request->date)->format('Y-m-d') : Carbon::today()->toDateString();
 
         if ($request->ajax()) {
-            $campaigns = Campaign::with([
+            $techId = $request->input('tech_id');
+
+            $campaignsQuery = Campaign::with([
                 'website',
                 'budgets' => function ($query) use ($date) {
                     $query->whereDate('date', $date);
                 },
                 'budgetsAll',
-                'user'
+                'user',
+                'tech'
             ])
             ->whereIn('status_id', [1, 2])
             ->whereHas('budgets', function ($q) use ($date) {
                 $q->whereDate('date', $date);
-            })
-            ->get();
+            });
+
+            if ($techId) {
+                $campaignsQuery->where('tech_id', $techId);
+            }
+
+            $campaigns = $campaignsQuery->get();
 
             $campaigns->each(function ($campaign) {
                 $actualCost = $campaign->budgetsAll->sum('budget');
@@ -224,7 +232,7 @@ class AdminController extends Controller
 
             return DataTables::of($campaigns)
                 ->addIndexColumn()
-                ->addColumn('website_name', fn($c) => '<a href="' . route('campaigns.budgets', $c->id) . '" target="_blank">' . $c->website->name . '</a>')
+                ->addColumn('website_name', fn($c) => '<a href="' . route('campaigns.budgets', $c->id) . '" target="_blank">' . $c->website->name . '</a><br><small>' . $c->tech?->fullname??''. '</small>')
                 ->addColumn('budget', fn($c) => $c->budgetmonth / 30)
                 ->addColumn('cost', fn($c) => '<span data-toggle="tooltip" data-placement="top" title="' . $c->budgets->pluck('account')->unique()->first() . '">' . number_format($c->budgets->sum('budget')) . '</span>')
                 ->addColumn('profit', fn($c) => $c->budgetmonth ? intval((($c->budgetmonth / 30 - $c->budgets->sum('budget')) / ($c->budgetmonth / 30)) * 100) . ' %' : '0 %')

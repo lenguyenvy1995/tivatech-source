@@ -25,11 +25,16 @@
                             <input type="text" id="dateBq" class="form-control"
                                 value="{{ \Carbon\Carbon::yesterday()->format('d-m-Y') }}">
                         </div>
-
+                    </div>
+                    <div class="col text-right">
+                        <button class="btn btn-secondary filter-tech-button" data-tech-id="">Tất cả</button>
+                        @foreach (App\Models\User::where('status',1)->where('roles_id','4')->get() as $tech)
+                            <button class="btn btn-success filter-tech-button" data-tech-id="{{ $tech->id }}">{{ $tech->fullname }}</button>
+                        @endforeach
                     </div>
                 </div>
 
-                <table id="datePerformanceDataTable" class="table table-bordered table-striped table-hover table-success">
+                <table id="datePerformanceDataTable" class="table table-bordered table-striped table-hover   ">
                     <thead>
                         <tr>
                             <th>STT</th>
@@ -78,6 +83,14 @@
         $('#dateBq').change(function(e) {
             table.draw();
         });
+        // Biến lưu kỹ thuật được chọn, mặc định lấy từ server nếu là techads, rỗng nếu admin
+        let selectedTechId = '{{ Auth::user()->hasRole("techads") ? Auth::id() : "" }}';
+
+        // Xử lý sự kiện click cho các nút kỹ thuật
+        $(document).on('click', '.filter-tech-button', function() {
+            selectedTechId = $(this).data('tech-id');
+            table.draw();
+        });
         let table = $('#datePerformanceDataTable').DataTable({
             processing: true,
             serverSide: true,
@@ -87,6 +100,7 @@
                 url: route('datePerformance'),
                 data: function(d) {
                     d.date = $('#dateBq').val();
+                    d.tech_id = selectedTechId;
                 },
                 dataSrc: 'data', // Đảm bảo ánh xạ tới `data` trong JSON trả về
                 error: function(xhr, status, error) {
@@ -166,6 +180,8 @@
                 $(row).attr('data-id', data.idCounter); // Thêm `data-id` vào từng hàng
             }
         });
+        // Khi load trang, nếu có selectedTechId (techads), chỉ hiển thị dữ liệu của họ; nếu admin, mặc định là "Tất cả"
+        table.draw();
     </script>
     <script>
         @if ($errors->any())
