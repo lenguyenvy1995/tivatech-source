@@ -102,7 +102,7 @@ class DataCustomerController extends Controller
         $data['user_id'] = Auth::id();
         // Chuẩn hóa domain: loại bỏ http(s):// và dấu / cuối
         $data['domain'] = preg_replace('#^https?://#', '', rtrim($data['domain'], '/'));
-
+// Thay thế dấu / thành dấu -
         if ($request->id) {
             // Chỉnh sửa khách hàng
             $customer = DataCustomer::findOrFail($request->id);
