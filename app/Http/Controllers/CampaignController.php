@@ -584,12 +584,15 @@ class CampaignController extends Controller
     //thay ddoiro trangj thai
     public function markAsSetup($id, Request $request)
     {
+        // Kiểm tra xem người dùng có quyền truy cập không
         $campaign = Campaign::findOrFail($id); // Tìm campaign theo ID
 
         // Cập nhật status_id thành 1 (hoàn thành setup)
         $campaign->status_id = 1;
         $campaign->tech_id = Auth::id();
         $campaign->save();
+        return $campaign;
+
         return response()->json(['success' => 'Campaign đã được setup thành công.']);
     }
     //bảng tính lương dự kiến

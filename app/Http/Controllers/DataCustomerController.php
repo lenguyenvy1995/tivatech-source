@@ -43,7 +43,6 @@ class DataCustomerController extends Controller
                 }
                 if (Auth::user()->hasRole('admin')) {
                     $query->orderBy('updated_at', 'desc');
-
                 }
                 // Kiểm tra quyền saler
                 else {
@@ -101,6 +100,8 @@ class DataCustomerController extends Controller
 
         $data = $request->all();
         $data['user_id'] = Auth::id();
+        // Chuẩn hóa domain: loại bỏ http(s):// và dấu / cuối
+        $data['domain'] = preg_replace('#^https?://#', '', rtrim($data['domain'], '/'));
 
         if ($request->id) {
             // Chỉnh sửa khách hàng

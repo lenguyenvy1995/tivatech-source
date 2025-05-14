@@ -84,6 +84,8 @@
                         _token: '{{ csrf_token() }}'
                     },
                     success: function(response) {
+                        console.log(response);
+                        
                         toastr.success(response.success); // Thông báo thành công
                         $('#campaigns-table').DataTable().ajax
                     .reload(); // Tải lại DataTable để cập nhật trạng thái
