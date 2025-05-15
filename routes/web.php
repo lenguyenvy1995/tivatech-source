@@ -31,7 +31,7 @@ use App\Http\Controllers\DomainController;
 use App\Http\Controllers\HostingController;
 use App\Http\Controllers\DesignWebsiteController;
 use App\Http\Controllers\KeywordController;
-
+use App\Http\Controllers\KeywordPlannerController;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -105,6 +105,10 @@ Route::middleware('auth')->group(function () {
     Route::get('/', function () {
         return redirect('/dashboard');
     })->name('home');
+    //kế hoạch từ khoá
+    Route::get('keyword-planner', [KeywordPlannerController::class, 'index'])->name('keyword-planner.index');
+    Route::post('keyword-planner/search', [KeywordPlannerController::class, 'search'])->name('keyword-planner.search');
+   
     //google sheet api
     Route::get('/intraday-performance', [AdminController::class, 'intradayPerformance'])->name('intradayPerformance');
     //hiệu suất theo ngày nhập vào

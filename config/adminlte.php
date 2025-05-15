@@ -406,7 +406,12 @@ return [
                 ],
             ],
         ],
-
+        //google planner
+        [
+            'text'    => 'Keyword Planner',
+            'icon'    => 'nav-icon fas fa-database',
+            'route'  => 'keyword-planner.index',
+        ],
         // QUẢNG LÝ Quảng cáo
         [
             'text'    => 'Quản Lý Quảng Cáo',
@@ -417,7 +422,6 @@ return [
                     'url'  => 'websites',
                     'icon' => 'nav-icon fas fa-user-plus',
                     'can'  => 'manage own quote requests',
-
                 ],
                 [
                     'text' => 'Setup ADS',
