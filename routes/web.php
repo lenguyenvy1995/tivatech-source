@@ -32,6 +32,9 @@ use App\Http\Controllers\HostingController;
 use App\Http\Controllers\DesignWebsiteController;
 use App\Http\Controllers\KeywordController;
 use App\Http\Controllers\KeywordPlannerController;
+use App\Http\Controllers\GoogleAdsSearchController;
+use App\Http\Controllers\AdsTransparencyController;
+
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -108,8 +111,15 @@ Route::middleware('auth')->group(function () {
     //kế hoạch từ khoá
     Route::get('keyword-planner', [KeywordPlannerController::class, 'index'])->name('keyword-planner.index');
     Route::post('keyword-planner/search', [KeywordPlannerController::class, 'search'])->name('keyword-planner.search');
-   
-    //google sheet api
+    //google ads search spi
+    Route::get('/ads-search', [GoogleAdsSearchController::class, 'index'])->name('ads.search');
+    Route::post('/ads-search/fetch', [GoogleAdsSearchController::class, 'ajax'])->name('ads.ajax');    //google sheet api
+    //google ads search transparency
+    Route::get('/ads-transparency', [AdsTransparencyController::class, 'index'])->name('ads.transparency');
+    Route::post('/ads-transparency/search', [AdsTransparencyController::class, 'search'])->name('ads.transparency.search');
+    Route::post('/ads-transparency/ajax', [AdsTransparencyController::class, 'ajax'])->name('ads.transparency.ajax');
+    Route::get('/ads-transparency/suggest', [AdsTransparencyController::class, 'suggest'])->name('ads.transparency.suggest');
+    //hiệu suất
     Route::get('/intraday-performance', [AdminController::class, 'intradayPerformance'])->name('intradayPerformance');
     //hiệu suất theo ngày nhập vào
     Route::get('/date-performance', [AdminController::class, 'datePerformance'])->name('datePerformance');
@@ -125,10 +135,11 @@ Route::middleware('auth')->group(function () {
     Route::get('/api/weekly-budget-comparison', [AdminController::class, 'getWeeklyBudgetComparison'])->name('api.weekly-budget-comparison');
 
     Route::get('/api/quote-requests', [QuoteRequestController::class, 'getData'])->name('quote-requests.data');
-    Route::get('/keywords/random', [KeywordController::class, 'getRandomKeywords'])->name('keywords.random');//route cho random hiển thị từ khoá 
+    Route::get('/keywords/random', [KeywordController::class, 'getRandomKeywords'])->name('keywords.random'); //route cho random hiển thị từ khoá 
     Route::middleware(['role:admin'])->group(function () {
         Route::resource('keywords', KeywordController::class);
-    });    // Routes cho tất cả người dùng đã đăng nhập
+    });    
+    // Routes cho tất cả người dùng đã đăng nhập
     // profile nhân viên
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
@@ -191,7 +202,7 @@ Route::middleware('auth')->group(function () {
         Route::post('/campaigns/update-paid', [CampaignController::class, 'updatePaid'])->name('campaigns.updatePaid');
         Route::get('/campaigns/create', [CampaignController::class, 'create'])->name('campaigns.create');
         Route::post('/campaigns/store', [CampaignController::class, 'store'])->name('campaigns.store');
-        Route::get('/campaigns/{id}/renew', [CampaignController::class, 'showRenewForm'])->name('campaigns.renew');//gia hạn
+        Route::get('/campaigns/{id}/renew', [CampaignController::class, 'showRenewForm'])->name('campaigns.renew'); //gia hạn
         Route::get('/campaigns/search', [CampaignController::class, 'search'])->name('campaigns.search');
 
         //list camp tính lương dự kiến

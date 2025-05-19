@@ -406,6 +406,21 @@ return [
                 ],
             ],
         ],
+
+        // Các mục menu khác...
+
+        ['header' => 'CÔNG CỤ PHÂN TÍCH'],
+
+        [
+            'text' => 'Tra cứu Quảng cáo',
+            'url'  => 'ads-search',
+            'icon' => 'fas fa-ad',
+        ],
+        [
+            'text' => 'Tra cứu Quảng cáo ATC',
+            'url'  => 'https://adstransparency.google.com/?region=VN&platform=SEARCH',
+            'icon' => 'fas fa-search-dollar', // bạn có thể thay đổi icon khác tùy ý
+        ],
         //google planner
         [
             'text'    => 'Keyword Planner',
@@ -450,17 +465,17 @@ return [
             'icon' => 'fas fa-key',
             'can' => 'manage users', // Chỉ hiển thị cho role:admin
         ],
-       [
-           'header' => 'QUẢN LÝ THIẾT KẾ WEBSITE',
-           'can' => ['Design Marketing'], // Chỉ hiển thị cho role:admin
-       ],
+        [
+            'header' => 'QUẢN LÝ THIẾT KẾ WEBSITE',
+            'can' => ['Design Marketing'], // Chỉ hiển thị cho role:admin
+        ],
 
-       [
-           'text' => 'Quản lý Website',
-           'url'  => 'design-websites',
-           'icon' => 'fas fa-globe',
-           'can' => ['Design Marketing'], // Chỉ hiển thị cho role:admin
-       ],
+        [
+            'text' => 'Quản lý Website',
+            'url'  => 'design-websites',
+            'icon' => 'fas fa-globe',
+            'can' => ['Design Marketing'], // Chỉ hiển thị cho role:admin
+        ],
         // Phân cách
         [
             'header' => 'LƯƠNG NHÂN VIÊN',
