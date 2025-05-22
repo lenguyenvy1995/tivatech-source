@@ -48,10 +48,10 @@ class QuoteRequestController extends Controller
             return DataTables::of($query)
                 ->addColumn('action', function ($row) {
                     if ($row->status == 'pending') {
-                        $btn = '<a href="' . route('quote-requests.edit', $row->id) . '" class="btn btn-sm btn-primary mr-1"><i class="fas fa-pencil-alt"></i></a>';
-
+                        $btn = '<a href="#" class="btn btn-sm btn-warning mr-1" data-toggle="tooltip" title="Báo gấp qua zalo"><i class="fas fa-exclamation-triangle"></i></a>';
+                        $btn .= '<a href="' . route('quote-requests.edit', $row->id) . '" class="btn btn-sm btn-primary mr-1" data-toggle="tooltip" title="Chỉnh sửa"><i class="fas fa-pencil-alt"></i></a>';
                         $btn .= '<form action="' . route('quote-requests.destroy', $row->id) . '" method="POST" style="display:inline;" onsubmit="return confirm(\'Bạn có chắc chắn muốn xóa yêu cầu này?\');">';
-                        $btn .= csrf_field() . method_field("DELETE") . '<button type="submit" class="btn btn-sm btn-danger mr-1"><i class="fas fa-trash"></i></button></form>';
+                        $btn .= csrf_field() . method_field("DELETE") . '<button type="submit" class="btn btn-sm btn-danger mr-1" data-toggle="tooltip" title="Xóa"><i class="fas fa-trash"></i></button></form>';
                         return $btn;
                     }
                 })
@@ -309,7 +309,6 @@ class QuoteRequestController extends Controller
                 ->addColumn('action', function ($row) {
                     if ($row->status == 'pending') {
                         $btn = '<a href="' . route('quotes.create', $row->id) . '" class="edit btn btn-primary btn-sm mr-1"> <i class="fa fa-pencil aria-hidden="true"></i>Báo giá</a>';
-                        $btn .= '<a href="#" class="edit btn btn-info btn-sm"> <i class="fa fa-pencil aria-hidden="true"></i>Báo Gấp<a>';
                     } else {
                         $btn = '<a href="' . route('quotes.edit', $row->id) . '" class="edit btn btn-danger btn-sm mr-1">Báo lại</a>';
                     }

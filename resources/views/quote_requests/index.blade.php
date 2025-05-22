@@ -12,6 +12,35 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     @routes
+    <style>
+        .tooltip-inner {
+            background-color: #343a40 !important;
+            /* màu nền */
+            color: #fff !important;
+            /* màu chữ */
+            padding: 6px 12px !important;
+            /* padding */
+            font-size: 13px;
+            border-radius: 4px;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+        }
+
+        .tooltip.bs-tooltip-top .arrow::before {
+            border-top-color: #343a40 !important;
+        }
+
+        .tooltip.bs-tooltip-bottom .arrow::before {
+            border-bottom-color: #343a40 !important;
+        }
+
+        .tooltip.bs-tooltip-left .arrow::before {
+            border-left-color: #343a40 !important;
+        }
+
+        .tooltip.bs-tooltip-right .arrow::before {
+            border-right-color: #343a40 !important;
+        }
+    </style>
 @stop
 @section('content')
     <!-- Form Lọc và Tìm Kiếm -->
@@ -28,7 +57,7 @@
                 </select>
             </div>
 
-     
+
             <!-- Lọc theo Quote Domain -->
             <div class="col-md-3">
                 <div class="form-group">
@@ -45,7 +74,7 @@
                 <button type="button" id="filterBtn" class="btn btn-primary">Lọc</button>
                 <button type="button" id="resetBtn" class="btn btn-secondary ml-2">Làm mới</button>
                 <a href="{{ route('quote-requests.create') }}" class="btn btn-success ml-2"> <i class="fa fa-plus"
-                    aria-hidden="true"></i> Tạo báo giá</a>
+                        aria-hidden="true"></i> Tạo báo giá</a>
             </div>
         </div>
     </form>
@@ -132,20 +161,32 @@
                 console.log(response)
             }
         });
+        $(function() {
+            $('[data-toggle="tooltip"]').tooltip({
+                delay: {
+                    "show": 50,
+                    "hide": 50
+                }, // mặc định là 200
+                placement: 'top', // top, bottom, left, right
+                trigger: 'hover focus'
+            });
+        });
         $(document).ready(function() {
-            table=$('#quoteRequestsTable').DataTable({
+            table = $('#quoteRequestsTable').DataTable({
                 processing: true,
                 serverSide: true,
-                ajax:{url: "{{ route('quote-requests.index') }}", // This will call your route that returns JSON data
-                data: function(d) {
-                    d.status = $('#filter_status').val(); // Lấy giá trị trạng thái từ form
-                    d.quoteDomain = $('#filter_quoteDomain').val(); // Lấy giá trị user từ form
-                }},
+                ajax: {
+                    url: "{{ route('quote-requests.index') }}", // This will call your route that returns JSON data
+                    data: function(d) {
+                        d.status = $('#filter_status').val(); // Lấy giá trị trạng thái từ form
+                        d.quoteDomain = $('#filter_quoteDomain').val(); // Lấy giá trị user từ form
+                    }
+                },
                 columns: [{
                         data: 'id',
                         name: 'id'
                     },
-                 
+
                     {
                         data: 'quote_domain',
                         name: 'quote_domain'
@@ -172,22 +213,22 @@
                         className: 'text-center',
                     },
                     {
-                    data: 'status',
-                    name: 'status',
-                    render: function(data, type, row) {
-                        if (data == 'Pending') {
-                            return '<span class="badge badge-warning">Chờ xử lý</span>';
-                        } else if (data == 'Quoted') {
-                            return '<span class="badge badge-success">Đã báo giá</span>';
-                        } else if (data == 'Rejected') {
-                            return '<span class="badge badge-secondary">Đã từ chối</span>';
-                        } else {
-                            return '<span class="badge badge-secondary"> N/A </span>';
-                        }
-                    },
-                    className: 'text-center',
+                        data: 'status',
+                        name: 'status',
+                        render: function(data, type, row) {
+                            if (data == 'Pending') {
+                                return '<span class="badge badge-warning">Chờ xử lý</span>';
+                            } else if (data == 'Quoted') {
+                                return '<span class="badge badge-success">Đã báo giá</span>';
+                            } else if (data == 'Rejected') {
+                                return '<span class="badge badge-secondary">Đã từ chối</span>';
+                            } else {
+                                return '<span class="badge badge-secondary"> N/A </span>';
+                            }
+                        },
+                        className: 'text-center',
 
-                },
+                    },
                     {
                         data: 'action',
                         name: 'action',
@@ -218,44 +259,44 @@
         $('#filterBtn').on('click', function() {
             table.draw(); // Gọi lại DataTables với các giá trị mới
         });
-           // Khi nhấn nút "Làm mới"
-           $('#resetBtn').on('click', function() {
+        // Khi nhấn nút "Làm mới"
+        $('#resetBtn').on('click', function() {
             $('#filterForm select').val('').trigger('change'); // Đặt lại form lọc
             table.draw(); // Gọi lại DataTables mà không có giá trị lọc
         });
     </script>
-        <script>
-            $(document).ready(function() {
-                // Khởi tạo Select2 cho các dropdown
-                $('.select2').select2({
-                    placeholder: '-- Chọn một tùy chọn --',
-                    allowClear: true
-                });
-    
-                // Hiển thị modal nếu có lỗi khi thêm Quote Domain mới
-                @if ($errors->has('name'))
-                    $('#addQuoteDomainModal').modal('show');
-                @endif
-    
-                // Cấu hình Toastr
-                toastr.options = {
-                    "closeButton": true,
-                    "progressBar": true,
-                    "positionClass": "toast-top-right",
-                    "timeOut": "5000",
-                };
-    
-                // Hiển thị thông báo lỗi từ server
-                @if ($errors->any())
-                    @foreach ($errors->all() as $error)
-                        toastr.error('{{ $error }}');
-                    @endforeach
-                @endif
-    
-                // Hiển thị thông báo thành công (nếu có)
-                @if (session('success'))
-                    toastr.success('{{ session('success') }}');
-                @endif
+    <script>
+        $(document).ready(function() {
+            // Khởi tạo Select2 cho các dropdown
+            $('.select2').select2({
+                placeholder: '-- Chọn một tùy chọn --',
+                allowClear: true
             });
-        </script>
+
+            // Hiển thị modal nếu có lỗi khi thêm Quote Domain mới
+            @if ($errors->has('name'))
+                $('#addQuoteDomainModal').modal('show');
+            @endif
+
+            // Cấu hình Toastr
+            toastr.options = {
+                "closeButton": true,
+                "progressBar": true,
+                "positionClass": "toast-top-right",
+                "timeOut": "5000",
+            };
+
+            // Hiển thị thông báo lỗi từ server
+            @if ($errors->any())
+                @foreach ($errors->all() as $error)
+                    toastr.error('{{ $error }}');
+                @endforeach
+            @endif
+
+            // Hiển thị thông báo thành công (nếu có)
+            @if (session('success'))
+                toastr.success('{{ session('success') }}');
+            @endif
+        });
+    </script>
 @stop
