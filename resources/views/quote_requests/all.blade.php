@@ -24,50 +24,47 @@
 @stop
 @section('content')
     <form id="filterForm" class="mb-4">
-        <div class="row">
-            <!-- Lọc theo Trạng thái -->
-            <div class="col-md-3">
-                <div class="form-group">
-                    <label for="filter_status">Trạng thái</label>
-                    <select id="filter_status" class="form-control ">
-                        <option value="">Tất cả Trạng thái</option>
-                        <option value="pending">Chờ xử lý</option>
-                        <option value="quoted">Đã báo giá</option>
-                        <option value="rejected">Đã từ chối</option>
-                    </select>
-                </div>
+        <div class="row g-3">
+            <!-- Trạng thái -->
+            <div class="col-auto">
+                <select id="filter_status" class="form-control">
+                    <option value="">Tất cả Trạng thái</option>
+                    <option value="pending">Chờ xử lý</option>
+                    <option value="quoted">Đã báo giá</option>
+                    <option value="rejected">Đã từ chối</option>
+                </select>
             </div>
 
-            <!-- Lọc theo Quote Domain -->
-            <div class="col-md-3">
-                <div class="form-group">
-                    <label for="filter_quoteDomain">Quote Domain</label>
-                    <select id="filter_quoteDomain" class="form-control select2">
-                        <option value="">Tất cả Domain</option>
-                        @foreach ($quoteDomains as $domain)
-                            <option value="{{ $domain->id }}">{{ $domain->name }}</option>
-                        @endforeach
-                    </select>
-                </div>
+            <!-- Quote Domain -->
+            <div class="col-auto">
+                <select id="filter_quoteDomain" class="form-control select2">
+                    <option value="">Tất cả Domain</option>
+                    @foreach ($quoteDomains as $domain)
+                        <option value="{{ $domain->id }}">{{ $domain->name }}</option>
+                    @endforeach
+                </select>
             </div>
 
-            <!-- Lọc theo User -->
-            <div class="col-md-3">
-                <div class="form-group">
-                    <label for="filter_user">Người yêu cầu</label>
-                    <select id="filter_user" class="form-control select2">
-                        <option value="">Tất cả Người dùng</option>
-                        @foreach ($users as $user)
-                            <option value="{{ $user->id }}">{{ $user->fullname }}</option>
-                        @endforeach
-                    </select>
-                </div>
+            <!-- Người yêu cầu -->
+            <div class="col-auto">
+                <select id="filter_user" class="form-control select2">
+                    <option value="">Tất cả Người dùng</option>
+                    @foreach ($users as $user)
+                        <option value="{{ $user->id }}">{{ $user->fullname }}</option>
+                    @endforeach
+                </select>
             </div>
 
+            <!-- Người yêu cầu -->
+            <div class="col-auto">
+                <input type="text" id="filter_keyword" class="form-control" placeholder="Từ khoá" name="keywords">
+            </div>
             <!-- Nút lọc -->
-            <div class="col-md-3 d-flex align-items-center">
-                <button type="button" id="filterBtn" class="btn btn-primary">Lọc</button>
-                <button type="button" id="resetBtn" class="btn btn-secondary ml-2">Làm mới</button>
+            <div class="col-auto">
+                <div class="d-flex gap-2">
+                    <button type="button" id="filterBtn" class="btn btn-primary">Lọc</button>
+                    <button type="button" id="resetBtn" class="btn btn-secondary ml-1">Làm mới</button>
+                </div>
             </div>
         </div>
     </form>
@@ -81,7 +78,7 @@
                     <th>Người yêu cầu</th>
                     <th>Domain</th>
                     <th>Từ khóa</th>
-                    <th  class="text-center" width="120px">Ngày Tạo</th>
+                    <th class="text-center" width="120px">Ngày Tạo</th>
                     <th class="text-center" width="75px">Trạng thái</th>
                     <th width="140px" class="text-center">Hành động <i class="fa fa-pencil" aria-hidden="true"></i></th>
                 </tr>
@@ -93,8 +90,7 @@
 @stop
 @section('js')
     <script>
-  
-        table =$('#quoteRequestsTable').DataTable({
+        table = $('#quoteRequestsTable').DataTable({
             processing: true,
             serverSide: true,
             ajax: {
@@ -103,11 +99,13 @@
                     d.status = $('#filter_status').val(); // Lấy giá trị trạng thái từ form
                     d.user_id = $('#filter_user').val(); // Lấy giá trị user từ form
                     d.quoteDomain = $('#filter_quoteDomain').val(); // Lấy giá trị user từ form
+                    d.keywords = $('#filter_keyword').val(); // Lấy giá trị user từ form
                 },
             },
-            columns: [{ data: 'id',
-            name: 'id',
-            },
+            columns: [{
+                    data: 'id',
+                    name: 'id',
+                },
                 {
                     data: 'user.fullname',
                     name: 'user.fullname',
@@ -163,7 +161,7 @@
                 {
                     data: 'action',
                     name: 'action',
-                      className: 'text-center',
+                    className: 'text-center',
                     orderable: false,
                     searchable: false
                 },
@@ -197,6 +195,8 @@
         // Khi nhấn nút "Lọc"
         $('#filterBtn').on('click', function() {
             table.draw(); // Gọi lại DataTables với các giá trị mới
+             // Lấy giá trị user từ form
+
         });
 
         // Khi nhấn nút "Làm mới"

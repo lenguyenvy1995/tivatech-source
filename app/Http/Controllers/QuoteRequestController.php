@@ -287,6 +287,12 @@ class QuoteRequestController extends Controller
                     $q->where('id', $request->quoteDomain);
                 });
             }
+            // Lọc theo keyword nếu có
+            if ($request->filled('keywords')) {
+                $query->where('keywords', 'like','%'.$request->keywords.'%');
+          
+            }
+            
             // Sắp xếp theo ưu tiên trạng thái `pending`, sau đó updated_at mới nhất và created_at mới nhất
             $query->orderByRaw("CASE WHEN status = 'pending' THEN 0 ELSE 1 END")
                 ->orderByDesc('updated_at')
@@ -303,6 +309,7 @@ class QuoteRequestController extends Controller
                 ->addColumn('action', function ($row) {
                     if ($row->status == 'pending') {
                         $btn = '<a href="' . route('quotes.create', $row->id) . '" class="edit btn btn-primary btn-sm mr-1"> <i class="fa fa-pencil aria-hidden="true"></i>Báo giá</a>';
+                        $btn .= '<a href="#" class="edit btn btn-info btn-sm"> <i class="fa fa-pencil aria-hidden="true"></i>Báo Gấp<a>';
                     } else {
                         $btn = '<a href="' . route('quotes.edit', $row->id) . '" class="edit btn btn-danger btn-sm mr-1">Báo lại</a>';
                     }
