@@ -229,11 +229,14 @@
     <script>
         $(document).ready(function() {
             // Khởi tạo Select2 cho các dropdown
-            $('.select2').select2({
-                placeholder: '-- Chọn một tùy chọn --',
+            $('#filter_quoteDomain').select2({
+                placeholder: '-- Chọn tên miền --',
                 allowClear: true
             });
-
+            $('#filter_user').select2({
+                placeholder: '-- Chọn nhân viên --',
+                allowClear: true
+            });
             // Hiển thị modal nếu có lỗi khi thêm Quote Domain mới
             @if ($errors->has('name'))
                 $('#addQuoteDomainModal').modal('show');
