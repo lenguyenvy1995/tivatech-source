@@ -65,7 +65,7 @@ class AdminController extends Controller
     // hiệu suất cập nhật trong ngày
     public function intradayPerformance(Request $request)
     {
-        $spreadsheetId = '19jJk8Awy_n56E7ZlAEnLAkeWvE_q-_5jnd_xomHfuvo'; // ID Google Sheet của bạn
+        $spreadsheetId = '1AlCXcv1KEdoQZK5N68HxzLoQ2No8Q4PyuDdNNUcgIKE'; // ID Google Sheet của bạn
         $range = 'cost_now'; // Lấy toàn bộ sheet
         $apiKey = env('GOOGLE_SHEET_API_KEY'); // API Key từ file .env
         if ($request->ajax()) {
